@@ -150,7 +150,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
             write(nud,'("* Instance ",i3," of ",i3,32x,"*")') &
                   mrpid+1, mrnum
             write(nud,'("* My    truncation  :",i5,27x,"*")') NTRU
-            write(nud,'("* Other truncation  :",i5,27x,"*")') mrtru(2-mrpid)
+!            write(nud,'("* Other truncation  :",i5,27x,"*")') mrtru(2-mrpid)
             write(nud,'(54("*"))')
          endif
          write(nud,'("* Truncation   NTRU :",i5,27x,"*")') NTRU
