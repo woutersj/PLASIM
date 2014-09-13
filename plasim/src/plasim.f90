@@ -1559,7 +1559,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
          jsp1=2*NTP1+1
          do jsp=jsp1,NRSP
             call random_number(zrand)
-            if (mrpid > 0) zrand = zrand + mrpid * 0.01
+!            if (mrpid > 0) zrand = zrand + mrpid * 0.01
             sp(jsp)=sp(jsp)+zscale*(zrand-0.5)
          enddo
          write(nud,'(" *     White noise added (KICK = 1)      *")')
