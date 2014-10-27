@@ -206,6 +206,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
       call mpbci(ntpal   ) ! color pallet for T
 
       call mpbci(kick    ) ! add noise for kick > 0
+      call mpbci(restkick) ! add noise according to the kick variable on restart if restkick > 0
       call mpbci(naqua   ) ! aqua planet switch
       call mpbci(nveg    ) ! vegetation switch
       call mpbci(noutput ) ! write data switch
@@ -468,6 +469,21 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
 
       subroutine master
       use pumamod
+      
+      
+      if (mypid == NROOT .and. nrestart > 0) then
+        write(nud, *) 'pre-noise mean lower lever air temperature along latitudinal circle in Europe', &
+								sum(dt(7*NLON + 1 : 7*NLON + 9, NLEP))/9
+      endif
+      
+			if (nrestart > 0 .and. restkick > 0) then
+         call noise
+			endif
+			
+			if (mypid == NROOT .and. nrestart > 0) then
+        write(nud, *) 'initial mean lower level air temperature along latitudinal circle in Europe', &
+								sum(dt(7*NLON + 1 : 7*NLON + 9, NLEP))/9
+      endif
 
 !     ***************************
 !     * short initial timesteps *
@@ -479,9 +495,6 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
          deltsec2 = deltsec + deltsec
          delt     = (TWOPI     / ntspd) / (2**nkits)
          delt2    = delt + delt
-!        if (mypid == NROOT) then
-!           write(nud,*) 'Initial timestep ',jkits,'   delt = ',delt
-!        endif
          call gridpointa
          call makebm
          call spectrala
@@ -489,6 +502,11 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
          call spectrald
          nkits = nkits - 1
       enddo
+      
+      if (mypid == NROOT .and. nrestart == 0) then
+				write(nud, *) 'initial mean surface air temperature along latitudinal circle in Europe', &
+								sum(dt(7*NLON + 1 : 7*NLON + 9, NLEP))/9
+			endif
 
 !     ****************************************************************
 !     * The scaling factor "ww" is derived from the rotation "omega" *
@@ -659,7 +677,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
       call mpputgp('dcc'    ,dcc    ,NHOR,NLEV)
       call mpputgp('dql'    ,dql    ,NHOR,NLEV)
       call mpputgp('dqsat'  ,dqsat  ,NHOR,NLEV)
-      call mpputgp('dt'     ,dt(1,NLEP),NHOR,1)
+      call mpputgp('dt'     ,dt     ,NHOR,NLEP)
       if (nqspec == 1) then ! spectral: save only soil humidity
          call mpputgp('dq'  ,dq(1,NLEP),NHOR,1)
       else                  ! semi-langrange: save complete humidity array
@@ -742,7 +760,9 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
          ires = nresources(zut,zst,imem,ipr,ipf,isw,idr,idw)
          call cpu_time(tmstop)
          tmrun = tmstop - tmstart
-         if (nstep > nstep1) then 
+         if (nstep > nstep1) then
+						write(nud, *) 'final mean surface air temperature along latitudinal circle in Europe', &
+							sum(dt(7*NLON + 1 : 7*NLON + 9, NLEP))/9
             zspy = tmrun * n_days_per_year * real(ntspd) / (nstep-nstep1)
             zypd = (24.0 * 3600.0 / zspy)                         ! siy / day
             write(nud,'(/,"****************************************")')
@@ -798,6 +818,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
          call get_restart_integer('nstep'   ,nstep)
          call get_restart_integer('naccuout',naccuout)
          call get_restart_seed('seed',meed,nseedlen)
+         meed = meed + mrpid + clock
          call get_restart_array('sz',sz,NRSP,NESP,NLEV)
          call get_restart_array('sd',sd,NRSP,NESP,NLEV)
          call get_restart_array('st',st,NRSP,NESP,NLEV)
@@ -834,7 +855,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
       call mpgetgp('dcc'    ,dcc    ,NHOR,NLEV)
       call mpgetgp('dql'    ,dql    ,NHOR,NLEV)
       call mpgetgp('dqsat'  ,dqsat  ,NHOR,NLEV)
-      call mpgetgp('dt'     ,dt(1,NLEP),NHOR,1)
+      call mpgetgp('dt'     ,dt     ,NHOR,NLEP)
       if (nqspec == 1) then ! spectral: read only soil humidity
          call mpgetgp('dq',dq(1,NLEP),NHOR,1)
       else                  ! semi-langrange: read complete humidity array
@@ -943,9 +964,9 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
       use pumamod
 
       namelist /plasim_nl/ &
-                     kick    , mpstep  , nadv    , naqua   , ncoeff     &
-                   , ndel    , ndheat  , ndiag   , ndiagcf , ndiaggp    &
-                   , ndiaggp2d , ndiaggp3d                              &
+                     kick    , restkick, mpstep  , nadv    , naqua      &
+                   , ncoeff  , ndel    , ndheat  , ndiag   , ndiagcf    &
+                   , ndiaggp , ndiaggp2d , ndiaggp3d                    &
                    , ndiagsp   , ndiagsp2d , ndiagsp3d                  &
                    , ndl     , nentropy, neqsig  , nflux                &
                    , ngui    , nguidbg , nhdiff  , nhordif , nkits      &
@@ -1529,7 +1550,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
          meed(1:i) = seed(1:i)
       else
          call system_clock(count=clock)
-         meed(:) = clock + 37 * (/(i,i=1,nseedlen)/)
+         meed(:) = clock + (37 + mrpid) * (/(i,i=1,nseedlen)/)
       endif
       call random_seed(put=meed)
       return
