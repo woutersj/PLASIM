@@ -504,7 +504,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
       enddo
       
       if (mypid == NROOT .and. nrestart == 0) then
-				write(nud, *) 'initial mean surface air temperature along latitudinal circle in Europe', &
+				write(nud, *) 'initial mean lower level air temperature along latitudinal circle in Europe', &
 								sum(dt(7*NLON + 1 : 7*NLON + 9, NLEP))/9
 			endif
 
@@ -761,7 +761,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
          call cpu_time(tmstop)
          tmrun = tmstop - tmstart
          if (nstep > nstep1) then
-						write(nud, *) 'final mean surface air temperature along latitudinal circle in Europe', &
+						write(nud, *) 'final mean lower level air temperature along latitudinal circle in Europe', &
 							sum(dt(7*NLON + 1 : 7*NLON + 9, NLEP))/9
             zspy = tmrun * n_days_per_year * real(ntspd) / (nstep-nstep1)
             zypd = (24.0 * 3600.0 / zspy)                         ! siy / day
