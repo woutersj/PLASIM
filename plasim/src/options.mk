@@ -1,0 +1,20 @@
+MPI_RUN=mpiexec
+MOST_F90_OPTS=-O3
+MOST_F90=mpif90
+MPIMOD=mpimod
+MOST_CC=mpicc
+MOST_CC_OPTS=-O3
+MOST_AS=as
+LEGMOD=legini
+LEGFAST=legfast32.o
+GUILIB=-L/usr/lib64 -lX11
+GUIMOD=guimod
+PUMAX=pumax
+
+FFTMOD=fftmod
+RAINMOD=rainmod
+VEGMOD=simba
+PLAMOD=p_earth
+LANDMOD=landmod
+OCEAN=lsgmod
+OCEANCOUP=cpl_stub
