@@ -151,6 +151,7 @@
 !     **************************
 
       integer :: kick     =  1  ! add noise for kick > 0
+      integer :: restkick =  0  ! add noise according to the kick variable on restart if restkick > 0
       integer :: mars     =  0  ! global switch for planet mars
       integer :: noutput  =  1  ! master switch for output: 0=no output
       integer :: nafter   =  0  ! write data interval: 0 = once per day

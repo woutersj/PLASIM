@@ -1,0 +1,5 @@
+&oceanmod_nl
+    nocean = 0
+    nlsg = 0
+    nperpetual_ocean = 140
+/

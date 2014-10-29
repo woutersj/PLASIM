@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
+#include <X11/XKBlib.h>
 
 #define INT int
 
@@ -972,6 +973,7 @@ void InitNamelist(void)
    NL_i(PLASIM,"plasim" ,"NWPD"    ,  1);
    NL_i(PLASIM,"plasim" ,"NPRINT"  ,  0);
    NL_i(PLASIM,"plasim" ,"NSYNC"   ,  1);
+   NL_i(PLASIM,"rainmod","NCLOUDS" ,  1);
    NL_i(PLASIM,"rainmod","NSTORAIN",  0);
    NL_r(PLASIM,"plasim" ,"SYNCSTR", 0.0);
 
@@ -1993,7 +1995,7 @@ int Build(int model)
    {
       if (Planet == MARS)
          sprintf(command,"cp plasim/dat/T%d_mars/* plasim/run/\n",Truncation);
-      if (Planet == EXO)
+      else if (Planet == EXO)
          sprintf(command,"cp plasim/dat/T%d_exo/* plasim/run/\n",Truncation);
       else
          sprintf(command,"cp plasim/dat/T%d/* plasim/run/\n",Truncation);
@@ -2852,7 +2854,7 @@ int PPPCompiled(void)
    strcpy(fn,"puma/run/");
    strcat(fn,exec_ppp);
 
-   if (fp = fopen(fn,"r"))
+   if ((fp = fopen(fn,"r")))
    {
       fclose(fp);
       return 1;
