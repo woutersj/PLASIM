@@ -13,7 +13,7 @@
     nguidbg = 0
     nqspec = 1
     nveg = 0
-    nwpd = 1
+    nwpd = 2 
     nprint = 0
     nsync = 0
     syncstr = 0.0
