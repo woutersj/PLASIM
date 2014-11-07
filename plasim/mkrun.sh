@@ -1,24 +1,27 @@
 #!/usr/bin/env bash
 
-if [[ $# -lt 2 || $# -gt 3 ]]; then
-	echo "Usage: mkrun.sh namelistDir runDir [numInstances]"
+if [[ $# -lt 3 || $# -gt 4 ]]; then
+	echo "Usage: mkrun.sh namelistDir dataDir runDir [numInstances]"
 	exit 1
 fi;
 
-if [ ! -d $2 ]; then
-	mkdir $2;
+if [ ! -d $3 ]; then
+	mkdir $3;
 else
 	echo "Target run directory exists!"
+	exit 1
 fi;
 
-if [ $# -eq 2 ]; then
-	cp "$1"/* "$2"
-elif [ $# -eq 3 ]; then
-	for instance in $(seq -f '%02G' 0 $(($3 - 1))); do
-		for namelist in $(ls namelists); do
-			cp namelists/"$namelist" "$2"/"$namelist"_"$instance"
+# copy namelists
+if [ $# -eq 3 ]; then
+	cp "$1"/* "$3"
+elif [ $# -eq 4 ]; then
+	for instance in $(seq -f '%02G' 0 $(($4 - 1))); do
+		for namelist in $(ls "$namelistDir"); do
+			cp "$namelistDir"/"$namelist" "$2"/"$namelist"_"$instance"
 		done
 	done
 fi;
 
-cp dat/T21/* $2
+# copy data
+cp "$2"/* "$3"
