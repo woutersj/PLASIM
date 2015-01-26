@@ -469,11 +469,12 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
 
       subroutine master
       use pumamod
-
-			if (nrestart > 0 .and. restkick > 0) then
+      
+      
+      if (nrestart > 0 .and. restkick > 0) then
          call noise
-			endif
-		
+      endif
+
 !     ***************************
 !     * short initial timesteps *
 !     ***************************
@@ -491,7 +492,6 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
          call spectrald
          nkits = nkits - 1
       enddo
-
 !     ****************************************************************
 !     * The scaling factor "ww" is derived from the rotation "omega" *
 !     * with 1 planetary rotation per sidereal day (2 Pi) of Earth   *

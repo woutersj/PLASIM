@@ -13,6 +13,7 @@ if [ ! -d $RUNDIR ]; then
 	mkdir $RUNDIR;
 else
 	echo "Target run directory exists!"
+	exit 1
 fi;
 
 if [ ! -d dat/$RESOLUTION ]; then
