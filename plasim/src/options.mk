@@ -1,7 +1,7 @@
 MPI_RUN=mpiexec
 MOST_F90_OPTS=-O3
 MOST_F90=mpif90
-MPIMOD=mpimod
+MPIMOD=mpimod_multi
 MOST_CC=mpicc
 MOST_CC_OPTS=-O3
 MOST_AS=as

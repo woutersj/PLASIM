@@ -469,22 +469,11 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
 
       subroutine master
       use pumamod
-      
-      
-      if (mypid == NROOT .and. nrestart > 0) then
-        write(nud, *) 'pre-noise mean lower lever air temperature along latitudinal circle in Europe', &
-								sum(dt(7*NLON + 1 : 7*NLON + 9, NLEP))/9
-      endif
-      
+
 			if (nrestart > 0 .and. restkick > 0) then
          call noise
 			endif
-			
-			if (mypid == NROOT .and. nrestart > 0) then
-        write(nud, *) 'initial mean lower level air temperature along latitudinal circle in Europe', &
-								sum(dt(7*NLON + 1 : 7*NLON + 9, NLEP))/9
-      endif
-
+		
 !     ***************************
 !     * short initial timesteps *
 !     ***************************
@@ -502,11 +491,6 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
          call spectrald
          nkits = nkits - 1
       enddo
-      
-      if (mypid == NROOT .and. nrestart == 0) then
-				write(nud, *) 'initial mean lower level air temperature along latitudinal circle in Europe', &
-								sum(dt(7*NLON + 1 : 7*NLON + 9, NLEP))/9
-			endif
 
 !     ****************************************************************
 !     * The scaling factor "ww" is derived from the rotation "omega" *
@@ -677,7 +661,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
       call mpputgp('dcc'    ,dcc    ,NHOR,NLEV)
       call mpputgp('dql'    ,dql    ,NHOR,NLEV)
       call mpputgp('dqsat'  ,dqsat  ,NHOR,NLEV)
-      call mpputgp('dt'     ,dt     ,NHOR,NLEP)
+      call mpputgp('dt'     ,dt(1,NLEP),NHOR,1)
       if (nqspec == 1) then ! spectral: save only soil humidity
          call mpputgp('dq'  ,dq(1,NLEP),NHOR,1)
       else                  ! semi-langrange: save complete humidity array
@@ -760,9 +744,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
          ires = nresources(zut,zst,imem,ipr,ipf,isw,idr,idw)
          call cpu_time(tmstop)
          tmrun = tmstop - tmstart
-         if (nstep > nstep1) then
-						write(nud, *) 'final mean lower level air temperature along latitudinal circle in Europe', &
-							sum(dt(7*NLON + 1 : 7*NLON + 9, NLEP))/9
+         if (nstep > nstep1) then 
             zspy = tmrun * n_days_per_year * real(ntspd) / (nstep-nstep1)
             zypd = (24.0 * 3600.0 / zspy)                         ! siy / day
             write(nud,'(/,"****************************************")')
@@ -855,7 +837,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
       call mpgetgp('dcc'    ,dcc    ,NHOR,NLEV)
       call mpgetgp('dql'    ,dql    ,NHOR,NLEV)
       call mpgetgp('dqsat'  ,dqsat  ,NHOR,NLEV)
-      call mpgetgp('dt'     ,dt     ,NHOR,NLEP)
+      call mpgetgp('dt'     ,dt(1,NLEP),NHOR,1)
       if (nqspec == 1) then ! spectral: read only soil humidity
          call mpgetgp('dq',dq(1,NLEP),NHOR,1)
       else                  ! semi-langrange: read complete humidity array
@@ -1572,8 +1554,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
 
       itp1 = NTP1 ! Suppress compiler warnings for T1
       if (itp1 <= 2 .and. kick > 2) kick = 0 ! for T1
-      zeps=1.e-4
-      zscale=zeps/sqrt(2.0)
+      zscale=epskick/sqrt(2.0)
 
       write(nud,'(/," *****************************************")')
       if (kick == 1) then
@@ -1584,6 +1565,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 12-Jun-2014"
             sp(jsp)=sp(jsp)+zscale*(zrand-0.5)
          enddo
          write(nud,'(" *     White noise added (KICK = 1)      *")')
+         write(nud,*) epskick
       elseif (kick == 2) then
          jr=2*NTP1-1
          do jm=1,NTRU
