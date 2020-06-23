@@ -12,10 +12,11 @@ logical :: lex
 namelist /planet_nl/ nfixorb, eccen, mvelp, obliq  &
                 , rotspd, sidereal_day, solar_day  &
                 , sidereal_year, tropical_year     &
-                , akap, alr, gascon, ra1, ra2, ra4 &
+                , akap, alr, alv, als, gascon, ra1, ra2, ra4, tmelt &
                 , pnu, ga, plarad &
                 , gsol0 &
                 , yplanet
+
 
 yplanet = "Exo"      ! Planet name
 nplanet = 1
@@ -39,10 +40,13 @@ tropical_year = 31556956.0    ! 365d 05h 49m 16s
 
 akap    =   0.286     ! Kappa (Poisson constant R/Cp)
 alr     =   0.0065    ! Lapse rate
+als     = 2.8345E6    ! Latent heat of sublimation
+alv     = 2.5008E6    ! Latent heat of vaporization
 gascon  = 287.0       ! Gas constant
 ra1     = 610.78      ! Parameter for Magnus-Teten-Formula
 ra2     =  17.2693882 ! for saturation vapor pressure
 ra4     =  35.86      ! over liquid water
+tmelt   = 273.16      ! Melting point (H2O)
 
 ! ********
 ! Numerics

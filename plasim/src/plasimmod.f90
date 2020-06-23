@@ -115,10 +115,7 @@
       parameter(PI     = 3.14159265359D0)  ! Pi
       parameter(TWOPI  = PI + PI)          ! 2 Pi
       parameter(RV     = 461.51)           ! Gas constant for water vapour
-      parameter(ALV    = 2.5008E6)         ! Latent heat of vaporization
-      parameter(ALS    = 2.8345E6)         ! Latent heat of sublimation
       parameter(ACPV   = 1870.)            ! Specific heat for water vapour
-      parameter(TMELT  = 273.16)           ! Melting point (H2O)
       parameter(TMELT_CO2 = 148.0)         ! Melting point (CO2) - for Mars
 
 !     ***************
@@ -139,7 +136,7 @@
       integer :: n_run_days      =       0 ! days  to run (debugging)
       integer :: n_run_steps     =       0 ! steps to run (debugging)
       integer :: mpstep          =       0 ! minutes/timestep = 1day/ntspd
-      integer :: ntspd           =      32 ! number of timesteps per day
+      integer :: ntspd           =       0 ! number of timesteps per day
       integer :: nwpd            =       1 ! number of writes per day
       integer :: ndatim(7)       =      -1 ! date & time array
       real    :: tmstart         =     0.0 ! start of run
@@ -187,7 +184,9 @@
       integer :: nperpetual = 0 ! radiation day for perpetual integration
       integer :: n_sea_points=0 ! number of sea points on grid
       integer :: nentropy = 0   ! switch for entropy diagnostics
+      integer :: nentro3d = 0   ! switch for 3d entropy diagnostics
       integer :: nenergy  = 0   ! switch for energy diagnostics
+      integer :: nener3d  = 0   ! switch for 3d energy diagnostics
       integer :: ndheat   = 1   ! switch for heating due to momentum dissipation
       integer :: nseedlen = 0   ! length of random seed (set by lib call)
       integer :: nsela    = 0   ! enable (1) or disable (0) Semi Lagrangian Advection
@@ -199,6 +198,8 @@
 !     * Global Real Scalars *
 !     ***********************
 
+      real :: als   = 2.8345E6! Latent heat of sublimation
+      real :: alv   = 2.5008E6! Latent heat of vaporization
       real :: plavor=     EZ  ! planetary vorticity
       real :: dawn  =     0.0 ! angle threshold for solar radiation
       real :: deltsec  =  0.0 ! timestep [sec]
@@ -215,6 +216,7 @@
       real :: co2   =   360.0  ! atm. co2 concentration (ppmv)
       real :: umax  =     0.0  ! diagnostic U max
       real :: t2mean=     0.0  ! diagnostic T2m mean
+      real :: tmelt = 273.16   ! Melting point (H2O)
       real :: precip=     0.0  ! diagnostic precipitation mean
       real :: evap  =     0.0  ! diagnostic evaporation
       real :: olr   =     0.0  ! Outgoing longwave radiation
@@ -385,12 +387,15 @@
 
       real, allocatable :: dgp2d(:,:),dsp2d(:,:)     ! 2-d diagnostics
       real, allocatable :: dgp3d(:,:,:),dsp3d(:,:,:) ! 3-d diagnostics
-      real, allocatable :: dclforc(:,:)  ! cloud forcing diagnostics
-      real, allocatable :: dentropy(:,:) ! entropy diagnostics
-      real, allocatable :: denergy(:,:)  ! energy diagnostics
-      real, allocatable :: dentrop(:)    ! ps for entropy diagnostics
-      real, allocatable :: dentrot(:,:)  ! t for entropy diagnostics
-      real, allocatable :: dentroq(:,:)  ! q for entropy diagnostics
+      real, allocatable :: dclforc(:,:)   ! cloud forcing diagnostics
+      real, allocatable :: dentropy(:,:)  ! entropy diagnostics
+      real, allocatable :: dentro3d(:,:,:)! entropy diagnostics 3d
+      real, allocatable :: denergy(:,:)   ! energy diagnostics
+      real, allocatable :: dener3d(:,:,:) ! energy diagnostics 3d
+      real, allocatable :: dentrop(:)     ! ps for entropy diagnostics
+      real, allocatable :: dentrot(:,:)   ! t for entropy diagnostics
+      real, allocatable :: dentroq(:,:)   ! q for entropy diagnostics
+      real, allocatable :: dentro(:)      ! 2d entropy for diagnostics
 
 !
 !     accumulated output

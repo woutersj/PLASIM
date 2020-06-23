@@ -1,11 +1,10 @@
 /*  c++ -O2 -o burn7.x burn7.cpp -lm -lnetcdf_c++ -lnetcdf */
 
 #define NETCDF_OUTPUT
-// #define OPEN_MP
 
-#define V0 "burn 7.4 (08-Aug-2012)"
-#define V1 "Edilbert Kirk - University of Hamburg"
-#define V2 "Usage: burn7 [-help|-c|-d|-m|-n|-s] <modelfile> <resultfile>"
+#define V0 "burn 7.7 (02-Feb-2017)"
+#define V1 "KlimaCampus"
+#define V2 "Usage: burn7 [-help|-c|-d|-m|-n|-r|-s] <modelfile> <resultfile>"
 #define V3 "New: option <-g> writes Grads ctl for service plotting"
 #define V4 "New: comments (#) are allowed in namelist file"
 
@@ -130,12 +129,13 @@ NcDim *TimDim;
 
 #endif
 
-int     SaveMemory = 0; /* Switch on for dynamic memory usage */
-int     PolyCreate = 0; /* Create polynomials files for hires T1365 and more */
-int     PolyDisk   = 0; /* Read polynomials from disk */
-int     GaussGrid  = 0; /* Output Guassian Grid */
-int     DPM        = 0; /* Days Per Month if DPM > 99 */
-int     DayDivisor = 0; /* Use for day adjustment if more than 99 days per month */
+int     SaveMemory =  0; /* Switch on for dynamic memory usage */
+int     PolyCreate =  0; /* Create polynomials files for hires T1365 and more */
+int     PolyDisk   =  0; /* Read polynomials from disk */
+int     GaussGrid  = -1; /* 1: use Gaussian grid, 0: use regular grid */
+int     DPM        =  0; /* Days Per Month */
+int     DPY        =  0; /* Days Per Year */
+int     DayDivisor =  0; /* Use for day adjustment if more than 99 days per month */
 
 char    VerType; /* s=Sigma   p=Pressure */
 char    HorType; /* s=Spherical   f=Fourier   z=Zonal Mean   g=Gauss Grid */
@@ -1386,7 +1386,7 @@ void ServiceGrid::Write_hgrid(void)
    for (code = 0; code < CODES; code++)
    if (All[code].selected)
    {
-      if (!&All[code].hgp[0])
+      if (All[code].hgp.size() == 0)
       {
          fprintf(stderr, "*** Error in ServiceGrid::Write_hgrid\n");
          fprintf(stderr, "    Code %d is not available on sigma level\n",code);
@@ -3451,22 +3451,22 @@ void legini(void)
    ZTEMP1 = new double[Fouriers];
    ZTEMP2 = new double[Fouriers];
 
-   for (int i=0 ; i<hdim ; ++i) pnm[i]=hnm[i]=777.0;
-   Gaulat = new GauLat(Gats,"Gaulat");
-   Outlon = new RegLon(Lons,"Outlon");
+   // if gridtype for output is not selected, choose Gauss grid
+   // for matching resolution and regular grid else
+
+   if (GaussGrid < 0) GaussGrid = (Lats == Gats && Lons == Gons);
+
+   Gaulat = new GauLat(Gats,"Gaulat"); // Gaussian latitudes of input grid
+   Outlon = new RegLon(Lons,"Outlon"); // Regular longitudes of output grid
    if (GaussGrid) Outlat = new GauLat(Lats,"Outlat");
    else           Outlat = new RegLat(Lats,"Outlat");
-   if (Debug) Outlat->PrintArray();
-   if (Debug) Outlon->PrintArray();
 
-   if (Lats == Gats && Lons == Gons)
-   for (jlat = 0 ; jlat < Gats ; ++jlat)
+   if (Debug)
    {
-      Outlat->Phi[jlat] = Gaulat->Phi[jlat];
-      Outlat->gmu[jlat] = Gaulat->gmu[jlat];
-      Outlat->gwt[jlat] = Gaulat->gwt[jlat];
+      Gaulat->PrintArray();
+      if (Lats != Gats || !GaussGrid) Outlat->PrintArray();
+      Outlon->PrintArray();
    }
-   else if (Debug) Outlat->PrintArray();
 
    if (PolyCreate)
    {
@@ -5135,13 +5135,14 @@ void PumaControl(void)
       if (DataStep < 0.01) // Compute time interval
       {
          if (HeadIn[2] != HeadSt[2] || HeadIn[3] != HeadSt[3])
-	 {
-	    HeadToDate(HeadSt,&D1);
+	     {
+    	    HeadToDate(HeadSt,&D1);
             HeadToDate(HeadIn,&D2);
             DeltaDy  = D2.tm_mday - D1.tm_mday;
             DeltaHr  = D2.tm_hour - D1.tm_hour;
             DeltaMn  = D2.tm_min  - D1.tm_min ;
-	    DataStep = DeltaDy + DeltaHr / 24.0 + DeltaMn / 1440.0;
+            if (DeltaDy < 0) DeltaDy = 1; // month changed after 1.st term
+    	    DataStep = DeltaDy + DeltaHr / 24.0 + DeltaMn / 1440.0;
          }
       }
 
@@ -5655,6 +5656,8 @@ void parini(void)
       sprintf(tb,"%10.10s = %8d           ","daydivisor",DayDivisor);
       LeftText(tb);
    }
+   DPY        = scanpar("dpy",0);
+   if (DPY > 0) DaysPerYear = DPY;
    Cyclical   = scanpar("cyclical",Cyclical);
    if (Cyclical) Cyclical = 1;
    if (VerType == 0 || HorType == 0)
@@ -5763,7 +5766,7 @@ void parini(void)
          {
             level[i] = 100.0 * hPa[i];
             if (hPa[i] <    0.0) Abort("pressure level < 0.0 is illegal");
-            if (hPa[i] > 2000.0) Abort("pressure level > 2000 hPa is illegal");
+//          if (hPa[i] > 2000.0) Abort("pressure level > 2000 hPa is illegal");
          }
       }
       else
@@ -5910,7 +5913,8 @@ void AnalyzeFile(void)
    
       fcb = ReadFCW();
       RealSize = fcb / SigLevs; // Should be float (4) or double (8)
-      if (RealSize != sizeof(float) && RealSize != sizeof(double)) Abort("FCW error on level record");
+      if (RealSize != sizeof(float) && RealSize != sizeof(double))
+         Abort("FCW error on level record");
       for (i = 0 ; i < SigLevs ; i++)
       {
          if (RealSize == sizeof(float)) vct[i+SigLevs+2] = ReadFLOAT();
@@ -5944,12 +5948,15 @@ void AnalyzeFile(void)
       fcb = ReadFCW();
       RealSize = fcb / (Gats * Gats * 2); // Should be float (4) or double (8)
       fseek(fpi,-4*LongFCW,SEEK_CUR);
-      if (RealSize != sizeof(float) && RealSize != sizeof(double)) Abort("FCW error on first array");
+      if (RealSize != sizeof(float) && RealSize != sizeof(double))
+         Abort("FCW error on first array");
       for (i = 0 ; i < SigLevs ; i++)
       {
          if (RealSize == sizeof(float)) vct[i+SigLevs+2] = ReadFLOAT();
          else                           vct[i+SigLevs+2] = ReadDOUBLE();
       }
+      if (RealSize == sizeof(float)) DaysPerYear = ReadFLOAT();
+      else                           DaysPerYear = ReadDOUBLE();
    }
    HeadSt = HeadIn;
    sprintf(tb,"Truncation                        = %6d",Truncation);
@@ -6120,14 +6127,15 @@ int main(int argc, char *argv[])
    for (i = 1 ; i < argc ; ++i) {
       if (argv[i][0] == '-') {
          if      (argv[i][1] == 'c') {PrintCodes(); exit(1);}
-         else if (argv[i][1] == 'd') Debug      = 1;
-         else if (argv[i][1] == 'v') Debug      = 1;
-         else if (argv[i][1] == 'n') NetCDF     = 1;
-         else if (argv[i][1] == 'g') Grads      = 1;
-         else if (argv[i][1] == 'm') Mean       = 1;
-         else if (argv[i][1] == 'p') PolyCreate = 1;
-         else if (argv[i][1] == 'i') GaussGrid  = 1;
-         else if (argv[i][1] == 's') SaveMemory = 1;
+         else if (argv[i][1] == 'd') Debug      =  1;
+         else if (argv[i][1] == 'v') Debug      =  1;
+         else if (argv[i][1] == 'n') NetCDF     =  1;
+         else if (argv[i][1] == 'g') Grads      =  1;
+         else if (argv[i][1] == 'm') Mean       =  1;
+         else if (argv[i][1] == 'p') PolyCreate =  1;
+         else if (argv[i][1] == 'i') GaussGrid  =  1;
+         else if (argv[i][1] == 'r') GaussGrid  =  0;
+         else if (argv[i][1] == 's') SaveMemory =  1;
          else Usage();
       }
       else if (ifile[0] == '\0') strcpy(ifile,argv[i]);
@@ -6236,6 +6244,16 @@ int main(int argc, char *argv[])
       SpecialUV = 1;
 
    Dependencies();
+
+   // Check correct vertical coordinate
+
+   if (GeopotHeight->selected && VerType != 'p')
+   {
+      printf("\n ****************** E R R O R ************************\n");
+      printf(" * Geopotential height (156) requires pressure level *\n");
+      printf(" *****************************************************\n");
+      exit(1);
+   }
 
    Geopotential->needed |= OutRep >= PRE_GRID
                         || SLP->needed || GeopotHeight->needed;

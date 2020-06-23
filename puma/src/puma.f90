@@ -179,7 +179,6 @@ integer :: nstep    = -1 ! current timestep step 0: 01-Jan-0001  00:00
 integer :: nstop    =  0 ! finishing timestep
 integer :: ntspd    =  0 ! one day = ntspd timesteps
 integer :: mpstep   =  0 ! minutes per step 0 = automatic
-integer :: spstep   =  0 ! seconds per step 0 = automatic
 integer :: ncu      =  0 ! check unit (debug output)
 integer :: nwrioro  =  1 ! controls output of orography
 integer :: nextout  =  0 ! 1: extended output (entropy production)
@@ -233,6 +232,7 @@ real :: plavor =    EZ    ! planetary vorticity
 real :: psmean = PSURF_EARTH ! Mean of Ps on Earth
 real :: rotspd =     1.0  ! rotation speed 1.0 = normal Earth rotation
 real :: sigmax =  6.0e-7  ! sigma for top half level
+real :: spstep =  0.0     ! seconds per step 0 = automatic
 real :: diffts = 21600.0  ! diffusion time scale [sec]
 real :: tac    =   360.0  ! length of annual cycle [days] (0 = no cycle)
 real :: pac    =     0.0  ! phase of the annual cycle [days]
@@ -773,7 +773,7 @@ call mpbci(nvg    )  ! Type of vertical grid
 call mpbci(nenergy)  ! energy diagnostics
 call mpbci(nentropy) ! entropy diagnostics
 call mpbci(ndheat)   ! energy recycling
-call mpbci(nradcv)  ! use two restoration fields
+call mpbci(nradcv)   ! use two restoration fields
 
 !     broadcast logical
 
@@ -1057,15 +1057,15 @@ end subroutine master
             write(nud,  '("* Total CPU time      : ", f10.3," sec *")') tmrun
             if (imem > 0) &
             write(nud,  '("* Memory usage        : ", f10.3," MB  *")') imem * 0.000001
-            if (ipr > 0) &
+            if (ipr > 0 .and. ipr < 1000000) &
             write(nud,  '("* Page reclaims       : ", i6," pages   *")') ipr
-            if (ipf > 0) &
+            if (ipf > 0 .and. ipf < 1000000) &
             write(nud,  '("* Page faults         : ", i6," pages   *")') ipf
-            if (isw > 0) &
+            if (isw > 0 .and. isw < 1000000) &
             write(nud,  '("* Page swaps          : ", i6," pages   *")') isw
-            if (idr > 0) &
+            if (idr > 0 .and. idr < 1000000) &
             write(nud,  '("* Disk read           : ", i6," blocks  *")') idr
-            if (idw > 0) &
+            if (idw > 0 .and. idw < 1000000) &
             write(nud,  '("* Disk write          : ", i6," blocks  *")') idw
             write(nud,'("****************************************")')
             if (zspy < 600.0) then
@@ -1299,6 +1299,7 @@ end subroutine master
       ncsp = nrsp / 2
       nspp = (nrsp + npro - 1) / npro
       nesp = nspp * npro
+      nesp = nesp + 3 - mod(nesp-1,4)
 
       return
       end

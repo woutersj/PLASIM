@@ -8,7 +8,7 @@
 !     namelist parameter:
 !
 
-      integer :: kbetta   = 1 ! switch for betta in kuo (1/0=yes/no)
+      integer :: kbeta    = 1 ! switch for beta in kuo (1/0=yes/no, 2=expl.)
       integer :: nprl     = 1 ! switch for large scale precip (1/0=yes/no)
       integer :: nprc     = 1 ! switch for large convective precip (1/0=yes/no)
       integer :: nclouds  = 1 ! switch for cloud generation (1/0=yes/no)
@@ -18,7 +18,10 @@
       integer :: nshallow = 1 ! switch for shallow convection (1/0=yes/no)
       integer :: nstorain = 0 ! switch for stochastic rain (1/0=yes/no)
       integer :: nevapprec= 1 ! switch for evaporation of precip.(1/0=yes/no)
+      integer :: nbeta    = 3 ! exp. to compute beta
 !
+      real :: rhbeta   =  0.  ! critical humidity (comp. of beta)
+      real :: rbeta    =  0.  ! beta if kbeta=2 (sensitivity tests)
       real :: clwcrit1 = -0.1 ! 1st critical vertical velocity for clouds
       real :: clwcrit2 =  0.0 ! 2nd critical vertical velocity for clouds
                               ! not active if clwcrit1 < clwcrit2
@@ -63,9 +66,9 @@
       subroutine rainini
       use rainmod
 !
-      namelist/rainmod_nl/kbetta,nprl,nprc,ndca,ncsurf,nmoment,nshallow &
+      namelist/rainmod_nl/kbeta,nprl,nprc,ndca,ncsurf,nmoment,nshallow  &
      &       ,nstorain,rcrit,clwcrit1,clwcrit2,pdeep,rkshallow,gamma    &
-     &       ,nclouds,pdeepth,nevapprec
+     &       ,nclouds,pdeepth,nevapprec,nbeta,rhbeta,rbeta      
 !
 !     reset defaults (according to general setup... tuning)
 !
@@ -92,7 +95,7 @@
 !
 !     broadcast namelist parameter
 !
-      call mpbci(kbetta)
+      call mpbci(kbeta)
       call mpbci(nprl)
       call mpbci(nprc)
       call mpbci(nclouds)
@@ -102,6 +105,9 @@
       call mpbci(nshallow)
       call mpbci(nstorain)
       call mpbci(nevapprec)
+      call mpbci(nbeta)
+      call mpbcr(rbeta)
+      call mpbcr(rhbeta)
       call mpbcr(clwcrit1)
       call mpbcr(clwcrit2)
       call mpbcr(pdeep)
@@ -306,11 +312,17 @@
       if(nentropy > 0) then
        dentropy(:,11)=0.
       endif
+      if(nentro3d > 0) then
+       dentro3d(:,:,11)=0.
+      endif
       if(nenergy > 0) then
        denergy(:,11)=0.
        denergy(:,15)=0.
       endif
-
+      if(nener3d > 0) then
+       dener3d(:,:,11)=0.
+       dener3d(:,:,15)=0.
+      endif
 !
 !*    initialize
 !
@@ -457,7 +469,7 @@
         call mpgagp(zprf3,zqsat,1)
         call mpgagp(zprf4,zdqdt,1)
         call mpgagp(zprf5,zdtdt,1)
-        call mpgagp(zprf6,dprll(:,jlev),1)
+        call mpgagp(zprf6,dprll(1,jlev),1)
         call mpgagp(zprf7,dp,1)
         if(mypid==NROOT) then
          if(jlev==1) write(nud,*)'In mklsp:'
@@ -489,20 +501,19 @@
 !     entropy/energy diagnostics
 !
        if(nentropy > 0) then
-        if(nentropy > 2) then
-         dentropy(:,11)=dentropy(:,11)                                  &
-     &                 +zdtdt(:)/dt(:,jlev)                             &
-     &                 *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
-        else
-         dentropy(:,11)=dentropy(:,11)                                  &
-     &                 +zdtdt(:)/dentrot(:,jlev)                        &
-     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)
-        endif
+        dentro(:)=zdtdt(:)/dentrot(:,jlev)                              &
+     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev) 
+        dentropy(:,11)=dentropy(:,11)+dentro(:)
+        if(nentro3d > 0) dentro3d(:,jlev,11)=dentro(:)
        endif
        if(nenergy > 0) then
         denergy(:,11)=denergy(:,11)                                     &
      &               +zdtdt(:)                                          &
      &               *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
+        if(nener3d > 0) then 
+         dener3d(:,jlev,11)=zdtdt(:)                                    &
+     &                   *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
+        endif
         do jhor=1,NHOR
          if(zt(jhor) > TMELT) then
           zzal=als
@@ -511,9 +522,12 @@
          endif
          denergy(jhor,15)=denergy(jhor,15)+zzal*zdqdt(jhor)             &
      &                                    *dsigma(jlev)*dp(jhor)/ga
+         if(nener3d > 0) then
+          dener3d(jhor,jlev,15)=zzal*zdqdt(jhor)                        &
+     &                         *dsigma(jlev)*dp(jhor)/ga
+         endif
         enddo
        endif
-
       enddo
 
       return
@@ -547,13 +561,14 @@
       real zi(NHOR)          ! moisture supply in the collumn
       real zpt(NHOR)         ! energy surplus of the cloud (t-part)
       real zpq(NHOR)         ! energy surplus of the cloud (q-part)
-      real zbetta(NHOR)      ! betta factor (new kuo scheme)
-      real zpbetta(NHOR)     ! p-scaling for betta factor
+      real zbeta(NHOR)       ! beta factor (new kuo scheme)
+      real zpbeta(NHOR)      ! p-scaling for beta factor
       real zat(NHOR)         ! distribution factor (temperature)
       real zaq(NHOR)         ! distribution factor (moisture)
       real zptop(NHOR)       ! cloud top pressure
       real zdqdts(NHOR,NLEV) ! dq/dt due to shallow convection
       real zdtdts(NHOR,NLEV) ! dt/dt due to shallow convection
+      real zrhm(NHOR)        ! mean relative humidity (for beta)
 
       real zdqdtold(NHOR,NLEV)    ! old q-tendency (for energy diagn.)
 
@@ -601,8 +616,8 @@
       zpq(:)=0.
       zat(:)=0.
       zaq(:)=0.
-      zbetta(:)=0.
-      zpbetta(:)=0.
+      zbeta(:)=0.
+      zpbeta(:)=0.
       zdtdt(:,:)=0.
       zdqdt(:,:)=0.
       icclev(:,:)=0
@@ -769,9 +784,9 @@
          zdtdt(jhor,NLEV)=ztp(jhor)-zte(jhor,NLEV)
          zpt(jhor)=zdtdt(jhor,NLEV)*dsigma(NLEV)*zacpe(jhor,NLEV)
          zpq(jhor)=zdqdt(jhor,NLEV)*dsigma(NLEV)*zale(jhor,NLEV)
-         if(kbetta > 0 ) then
-          zbetta(jhor)=AMIN1(1.,zqe(jhor,NLEV)/zqsa)*dsigma(NLEV)
-          zpbetta(jhor)=dsigma(NLEV)
+         if(kbeta > 0 ) then
+          zbeta(jhor)=AMIN1(1.,zqe(jhor,NLEV)/zqsa)*dsigma(NLEV)
+          zpbeta(jhor)=dsigma(NLEV)
          endif
 
 !
@@ -894,9 +909,9 @@
            zdtdt(jhor,jlev)=ztp(jhor)-zte(jhor,jlev)
            zpt(jhor)=zdtdt(jhor,jlev)*dsigma(jlev)*zacpe(jhor,jlev)
            zpq(jhor)=zdqdt(jhor,jlev)*dsigma(jlev)*zale(jhor,jlev)
-           if(kbetta > 0 ) then
-            zbetta(jhor)=AMIN1(1.,zqe(jhor,jlev)/zqsa)*dsigma(jlev)
-            zpbetta(jhor)=dsigma(jlev)
+           if(kbeta > 0 ) then
+            zbeta(jhor)=AMIN1(1.,zqe(jhor,jlev)/zqsa)*dsigma(jlev)
+            zpbeta(jhor)=dsigma(jlev)
            endif
 
 !
@@ -963,10 +978,10 @@
      &              +zpt(jhor)
            zpq(jhor)=zdqdt(jhor,jlep)*dsigma(jlep)*zale(jhor,jlep)        &
      &              +zpq(jhor)
-           if(kbetta > 0 ) then
-            zbetta(jhor)=AMIN1(1.,zqe(jhor,jlep)/zqsnl)*dsigma(jlep)    &
-     &                  +zbetta(jhor)
-            zpbetta(jhor)=dsigma(jlep)+zpbetta(jhor)
+           if(kbeta > 0 ) then
+            zbeta(jhor)=AMIN1(1.,zqe(jhor,jlep)/zqsnl)*dsigma(jlep)    &
+     &                  +zbeta(jhor)
+            zpbeta(jhor)=dsigma(jlep)+zpbeta(jhor)
            endif
            endif
 
@@ -1091,10 +1106,10 @@
      &              +zpt(jhor)
            zpq(jhor)=zdqdt(jhor,jlev)*dsigma(jlev)*zale(jhor,jlev)     &
      &              +zpq(jhor)
-           if(kbetta > 0 ) then
-            zbetta(jhor)=AMIN1(1.,zqe(jhor,jlev)/zqsa)*dsigma(jlev)     &
-     &                  +zbetta(jhor)
-            zpbetta(jhor)=zpbetta(jhor)+dsigma(jlev)
+           if(kbeta > 0 ) then
+            zbeta(jhor)=AMIN1(1.,zqe(jhor,jlev)/zqsa)*dsigma(jlev)     &
+     &                  +zbeta(jhor)
+            zpbeta(jhor)=zpbeta(jhor)+dsigma(jlev)
            endif
 
 !
@@ -1115,10 +1130,10 @@
 
       zi(:)=AMAX1(0.,zi(:))
 
-      if(kbetta==0) then
+      if(kbeta==0) then
 
 !
-!     kuo without betta
+!     kuo without beta
 !
 
        where(zpt(:)+zpq(:) > 0.)
@@ -1126,14 +1141,24 @@
         zaq(:)=zat(:)
        end where
       else
-
 !
-!     kuo with betta
+!     kuo with beta
 !
+!     a) beta computed from rel. humidity       
+!
+       zrhm(:)=0.
+       where(zpbeta(:) > 0.) zrhm(:)=zbeta(:)/zpbeta(:)
+       zbeta(:)=1.
+       where(zrhm(:) >= rhbeta) 
+        zbeta(:)=((1.-zrhm(:))/(1.-rhbeta))**nbeta
+       endwhere
+!
+!     b) beta give explicitely (for sensitivity studies, etc.)
 
-       where(zpbetta(:) > 0.) zbetta(:)=(1.-zbetta(:)/zpbetta(:))**3
-       where(zpt(:) > 0.) zat(:)=zi(:)*(1.-zbetta(:))/zpt(:)
-       where(zpq(:) > 0.) zaq(:)=zi(:)*zbetta(:)/zpq(:)
+       if(kbeta==2) zbeta(:)=rbeta        
+
+       where(zpt(:) > 0.) zat(:)=zi(:)*(1.-zbeta(:))/zpt(:)
+       where(zpq(:) > 0.) zaq(:)=zi(:)*zbeta(:)/zpq(:)
 
       endif
 
@@ -1354,32 +1379,26 @@
 !
       if(nentropy > 0) then
        dentropy(:,12)=0.
+       if(nentro3d > 0) dentro3d(:,:,12)=0.
        do jlev=1,NLEV
-        if(nentropy > 2) then
-        where(ilift(:) >= jlev .and. itop(:) <= jlev .and. zi(:) > 0.   &
-     &       .and. ishallow(:) == 0)
-         dentropy(:,12)=dentropy(:,12)                                  &
-     &         +zat(:)*zdtdt(:,jlev)/deltsec2/dt(:,jlev)                &
-     &         *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
-        endwhere
-        else 
         where(ilift(:) >= jlev .and. itop(:) <= jlev .and. zi(:) > 0.   &
      &       .and.ishallow(:) == 0)
-         dentropy(:,12)=dentropy(:,12)                                  &
-     &         +zat(:)*zdtdt(:,jlev)/deltsec2/dentrot(:,jlev)           &
+         dentro(:)=+zat(:)*zdtdt(:,jlev)/deltsec2/dentrot(:,jlev)       &
      &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)
+         dentropy(:,12)=dentropy(:,12)+dentro(:)
         endwhere
+        if(nentro3d > 0) then
+         where(ilift(:) >= jlev .and. itop(:) <= jlev .and. zi(:) > 0.  &
+     &        .and.ishallow(:) == 0)
+          dentro3d(:,jlev,12)=dentro(:)
+         endwhere
         endif
         if(nshallow == 1) then
-         if(nentropy > 2) then
-          dentropy(:,12)=dentropy(:,12)                                 &
-     &                  +zdtdts(:,jlev)/dt(:,jlev)                      &
-     &                  *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
-         else
-          dentropy(:,12)=dentropy(:,12)                                 &
-     &                  +zdtdts(:,jlev)/dentrot(:,jlev)                 &
+         dentro(:)=zdtdts(:,jlev)/dentrot(:,jlev)                       &
      &        *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)
-         endif
+         dentropy(:,12)=dentropy(:,12)+dentro(:)
+         if(nentro3d > 0) dentro3d(:,jlev,12)=dentro3d(:,jlev,12)       &
+     &                                       +dentro(:)
         endif
        enddo
       endif
@@ -1405,6 +1424,27 @@
      &                *dsigma(jlev)*dp(:)/ga
         endif
        enddo
+       if(nener3d > 0) then
+        dener3d(:,:,12)=0.
+        dener3d(:,:,16)=0.
+        do jlev=1,NLEV
+         where(ilift(:) >= jlev .and. itop(:) <= jlev .and. zi(:) > 0.  &
+     &        .and.ishallow(:) == 0)
+          dener3d(:,jlev,12)=zat(:)*zdtdt(:,jlev)/deltsec2              &
+     &                   *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
+         endwhere
+         dener3d(:,jlev,16)=alv*(dqdt(:,jlev)-zdqdtold(:,jlev))         &
+     &                     *dsigma(jlev)*dp(:)/ga
+         if(nshallow == 1) then
+          dener3d(:,jlev,12)=dener3d(:,jlev,12)                         &
+     &                      +zdtdts(:,jlev)/deltsec2                    &
+     &                   *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
+          dener3d(:,jlev,16)=dener3d(:,jlev,16)                         &
+     &                      +alv*zdqdts(:,jlev)                         &
+     &                      *dsigma(jlev)*dp(:)/ga
+         endif
+        enddo
+       endif
       endif
 !
       return
@@ -2029,15 +2069,10 @@
       if(nentropy > 0) then
        dentropy(:,13)=0.
        do jlev=1,NLEV
-        if(nentropy > 2) then
-         dentropy(:,13)=dentropy(:,13)                                  &
-     &                 +zdtdt(:,jlev)/dt(:,jlev)                        &
-     &                 *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
-        else
-         dentropy(:,13)=dentropy(:,13)                                  &
-     &                 +zdtdt(:,jlev)/dentrot(:,jlev)                   &
-     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)
-        endif
+        dentro(:)=zdtdt(:,jlev)/dentrot(:,jlev)                         &
+     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev) 
+        dentropy(:,13)=dentropy(:,13)+dentro(:)
+        if(nentro3d > 0) dentro3d(:,jlev,13)=dentro(:)
        enddo
       endif
       if(nenergy > 0) then
@@ -2046,6 +2081,10 @@
         denergy(:,13)=denergy(:,13)                                     &
      &               +zdtdt(:,jlev)                                     &
      &               *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
+        if(nener3d > 0) then
+         dener3d(:,jlev,13)=zdtdt(:,jlev)                               &
+     &                   *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
+        endif
        enddo
       endif
 !
@@ -2223,15 +2262,10 @@
       if(nentropy > 0) then
        dentropy(:,20)=0.
        do jlev=1,NLEV
-        if(nentropy > 2) then
-         dentropy(:,20)=dentropy(:,20)                                  &
-     &                 +zdtdt(:,jlev)/dt(:,jlev)                        &
-     &                 *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
-        else
-         dentropy(:,20)=dentropy(:,20)                                  &
-     &                 +zdtdt(:,jlev)/dentrot(:,jlev)                   &
+        dentro(:)=zdtdt(:,jlev)/dentrot(:,jlev)                         &
      &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)
-        endif
+        dentropy(:,20)=dentropy(:,20)+dentro(:)
+        if(nentro3d > 0) dentro3d(:,jlev,14)=dentro(:)
        enddo
       endif
       if(nenergy > 0) then
@@ -2240,6 +2274,10 @@
          denergy(:,14)=denergy(:,14)                                    &
      &                +zdtdt(:,jlev)                                    &
      &                *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
+         if(nener3d > 0) then
+          dener3d(:,jlev,14)=zdtdt(:,jlev)                              &
+     &                   *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
+         endif 
        enddo
       endif
 

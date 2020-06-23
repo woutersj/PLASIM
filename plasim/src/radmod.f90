@@ -25,10 +25,10 @@
       real    :: solclat = 1.0    ! cos of lat of insolation if ncstsol=1
       real    :: solcdec = 1.0    ! cos of dec of insolation if ncstsol=1
       real    :: clgray  = -1.0   ! cloud grayness (-1 = computed)
-      real    :: th2oc   = 0.04   ! absorption coefficient h2o continuum (lwr)
-      real    :: tswr1   = 0.0641 ! tuning of cloud albedo range1
-      real    :: tswr2   = 0.048  ! tuning of cloud back scattering c. range2
-      real    :: tswr3   = 0.0045 ! tuning of cloud s. scattering alb. range2
+      real    :: th2oc   = 0.024  ! absorption coefficient h2o continuum (lwr)
+      real    :: tswr1   = 0.077  ! tuning of cloud albedo range1
+      real    :: tswr2   = 0.065  ! tuning of cloud back scattering c. range2
+      real    :: tswr3   = 0.0055 ! tuning of cloud s. scattering alb. range2
       real    :: tpofmt  = 1.00   ! tuning of point of mean transmittance
       real    :: acllwr  = 0.100  ! mass absorption coefficient for clouds (lwr)
       real    :: a0o3    = 0.25   ! parameter to define o3 profile
@@ -62,6 +62,7 @@
       real :: gmu0(NHOR)                   ! cosine of solar zenit angle
       real :: gmu1(NHOR)                   ! cosine of solar zenit angle
       real :: dqo3(NHOR,NLEV)        = 0.0 ! ozon concentration (kg/kg)
+      real :: dqco2(NHOR,NLEV)       = 0.0 ! co2 concentration (ppmv)
       real :: dtdtlwr(NHOR,NLEV)           ! lwr temperature tendencies
       real :: dtdtswr(NHOR,NLEV)           ! swr temperature tendencies
 
@@ -185,8 +186,9 @@
            jtune=0
           else
            tswr1=0.02
+           tswr2=0.065
            tswr3=0.004
-           th2oc=0.035
+           th2oc=0.024
            jtune=1
           endif
          endif 
@@ -197,12 +199,29 @@
           if(NEQSIG==1) then
            jtune=0
           else
-           th2oc=0.03
-           tswr1=0.0641
-           tswr3=0.0045 
+           th2oc=0.024
+           tswr1=0.077
+           tswr2=0.065
+           tswr3=0.0055 
            jtune=1
           endif
          endif 
+        endif
+       elseif(NTRU==31) then
+        if(NLEV==10) then
+         if(NDCYCLE==1) then
+          jtune=0
+         else
+          if(NEQSIG==1) then
+           jtune=0
+          else
+           tswr1=0.077
+           tswr2=0.067
+           tswr3=0.0055
+           th2oc=0.024
+           jtune=1
+          endif
+         endif
         endif
        elseif(NTRU==42) then
         if(NLEV==10) then
@@ -212,9 +231,10 @@
           if(NEQSIG==1) then
            jtune=0
           else
-           tswr1=0.085
+           tswr1=0.089
+           tswr2=0.06
            tswr3=0.0048
-           th2oc=0.035
+           th2oc=0.0285
            jtune=1
           endif
          endif
@@ -297,6 +317,13 @@
          allocate(dqo3cl(NHOR,NLEV,0:13))
          dqo3cl(:,:,:) = 0.0
          call mpsurfgp('dqo3cl',dqo3cl,NHOR,NLEV*14)
+      endif
+!
+!     set co2 3d-field (enable external co2 by if statement)
+!
+!
+      if(co2 > 0.) then
+       dqco2(:,:)=co2
       endif
 !
       return
@@ -555,152 +582,91 @@
        dentropy(:,17)=dswfl(:,NLEP)/dt(:,NLEP)
        dentropy(:,27)=dftd(:,NLEP)/dt(:,NLEP)
        dentropy(:,28)=dftu(:,NLEP)/dt(:,NLEP)
+       dentropy(:,9)=0.
+       dentropy(:,10)=0.
+       dentropy(:,21)=0.
+       dentropy(:,22)=0.
+       dentropy(:,23)=0.
+       dentropy(:,24)=0.
+       dentropy(:,26)=0.
        dentropy(:,29)=0.
        dentropy(:,30)=0.
        do jlev=1,NLEV
-        dentropy(:,29)=dentropy(:,29)+dftu0(:,jlev)/dentrot(:,jlev)
-        dentropy(:,30)=dentropy(:,30)+dftd0(:,jlev)/dentrot(:,jlev)
-       enddo
-       allocate(zdtdte(NHOR,NLEV))
-       dentropy(:,9)=0.
-       do jlev=1,NLEV
-        jlep=jlev+1
-        zdtdte(:,jlev)=-ga*(dlwfl(:,jlep)-dlwfl(:,jlev))                &
-     &                /(dsigma(jlev)*dp(:)*acpd*(1.+ADV*dq(:,jlev)))
-        if(nentropy > 2) then
-        dentropy(:,9)=dentropy(:,9)                                     &
-     &         +zdtdte(:,jlev)/dt(:,jlev)                               &
-     &         *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
-        else
-        dentropy(:,9)=dentropy(:,9)                                     &
-     &         +zdtdte(:,jlev)/dentrot(:,jlev)                          &
-     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)
-        endif
-       enddo
-       dentropy(:,21)=0.
-       do jlev=1,NLEV
-        jlep=jlev+1
-        zdtdte(:,jlev)=-ga*(dftd(:,jlep)-dftd(:,jlev))                  &
-     &                /(dsigma(jlev)*dp(:)*acpd*(1.+ADV*dq(:,jlev)))
-        if(nentropy > 2) then
-        dentropy(:,21)=dentropy(:,21)                                   &
-     &         +zdtdte(:,jlev)/dt(:,jlev)                               &
-     &         *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
-        else
-        dentropy(:,21)=dentropy(:,21)                                   &
-     &         +zdtdte(:,jlev)/dentrot(:,jlev)                          &
-     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)
-        endif
-       enddo
-       dentropy(:,22)=0.
-       do jlev=1,NLEV
-        jlep=jlev+1
-        zdtdte(:,jlev)=-ga*(dftu(:,jlep)-dftu(:,jlev))                  &
-     &                /(dsigma(jlev)*dp(:)*acpd*(1.+ADV*dq(:,jlev)))
-        if(nentropy > 2) then
-        dentropy(:,22)=dentropy(:,22)                                   &
-     &         +zdtdte(:,jlev)/dt(:,jlev)                               &
-     &         *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
-        else
-        dentropy(:,22)=dentropy(:,22)                                   &
-     &         +zdtdte(:,jlev)/dentrot(:,jlev)                          &
-     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)
-        endif
-       enddo
-       dentropy(:,23)=0.
-       do jlev=1,NLEV
-        jlep=jlev+1
-        zdtdte(:,jlev)=-ga*(dftue1(:,jlep)-dftue1(:,jlev))              &
-     &                /(dsigma(jlev)*dp(:)*acpd*(1.+ADV*dq(:,jlev)))
-        if(nentropy > 2) then
-        dentropy(:,23)=dentropy(:,23)                                   &
-     &         +zdtdte(:,jlev)/dt(:,jlev)                               &
-     &         *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
-        else
-        dentropy(:,23)=dentropy(:,23)                                   &
-     &         +zdtdte(:,jlev)/dentrot(:,jlev)                          &
-     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)
-        endif
-       enddo
-       dentropy(:,24)=0.
-       do jlev=1,NLEV
-        jlep=jlev+1
-        zdtdte(:,jlev)=-ga*(dftue2(:,jlep)-dftue2(:,jlev))              &
-     &                /(dsigma(jlev)*dp(:)*acpd*(1.+ADV*dq(:,jlev)))
-        if(nentropy > 2) then
-        dentropy(:,24)=dentropy(:,24)                                   &
-     &         +zdtdte(:,jlev)/dt(:,jlev)                               &
-     &         *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
-        else
-        dentropy(:,24)=dentropy(:,24)                                   &
-     &         +zdtdte(:,jlev)/dentrot(:,jlev)                          &
-     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)
-        endif
-       enddo
-       dentropy(:,26)=0.
-       do jlev=1,NLEV
-        jlep=jlev+1
-        zdtdte(:,jlev)=-ga*(dftue2(:,jlep)-dftue2(:,jlev))              &
-     &                /(dsigma(jlev)*dp(:)*acpd*(1.+ADV*dq(:,jlev)))
-        dentropy(:,26)=dentropy(:,26)                                   &
-     &              +zdtdte(:,jlev)                                     &
-     &              *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
+        jlep=jlev+1  
+        dentro(:)=dftu0(:,jlev)/dentrot(:,jlev)
+        dentropy(:,29)=dentropy(:,29)+dentro(:)
+        if(nentro3d > 0) dentro3d(:,jlev,19)=dentro(:)
+        dentro(:)=dftd0(:,jlev)/dentrot(:,jlev)
+        dentropy(:,30)=dentropy(:,30)+dentro(:)
+        if(nentro3d > 0) dentro3d(:,jlev,20)=dentro(:)
+        dentro(:)=-ga*(dlwfl(:,jlep)-dlwfl(:,jlev))                     &
+     &           /(dsigma(jlev)*dp(:)*acpd*(1.+ADV*dq(:,jlev)))         &
+     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)&
+     &         /dentrot(:,jlev)
+        dentropy(:,9)=dentropy(:,9)+dentro(:)
+        if(nentro3d > 0) dentro3d(:,jlev,9)=dentro(:)
+        dentro(:)=-ga*(dswfl(:,jlep)-dswfl(:,jlev))                     &
+     &           /(dsigma(jlev)*dp(:)*acpd*(1.+ADV*dq(:,jlev)))         &
+     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)&
+     &         /dentrot(:,jlev)
+        dentropy(:,10)=dentropy(:,10)+dentro(:)
+        if(nentro3d > 0) dentro3d(:,jlev,10)=dentro(:)
+        dentro(:)=-ga*(dftd(:,jlep)-dftd(:,jlev))                       &
+     &           /(dsigma(jlev)*dp(:)*acpd*(1.+ADV*dq(:,jlev)))         &
+     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)&
+     &         /dentrot(:,jlev) 
+        dentropy(:,21)=dentropy(:,21)+dentro(:)
+        if(nentro3d > 0) dentro3d(:,jlev,15)=dentro(:)
+        dentro(:)=-ga*(dftu(:,jlep)-dftu(:,jlev))                       &
+     &           /(dsigma(jlev)*dp(:)*acpd*(1.+ADV*dq(:,jlev)))         &
+     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)&
+     &         /dentrot(:,jlev)
+        dentropy(:,22)=dentropy(:,22)+dentro(:)
+        if(nentro3d > 0) dentro3d(:,jlev,16)=dentro(:)
+        dentro(:)=-ga*(dftue1(:,jlep)-dftue1(:,jlev))                   &
+     &           /(dsigma(jlev)*dp(:)*acpd*(1.+ADV*dq(:,jlev)))         &
+     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)&
+     &         /dentrot(:,jlev)
+        dentropy(:,23)=dentropy(:,23)+dentro(:)
+        if(nentro3d > 0) dentro3d(:,jlev,17)=dentro(:) 
+        dentro(:)=-ga*(dftue2(:,jlep)-dftue2(:,jlev))                   &
+     &           /(dsigma(jlev)*dp(:)*acpd*(1.+ADV*dq(:,jlev)))         &
+     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)&
+     &         /dentrot(:,jlev)
+        dentropy(:,24)=dentropy(:,24)+dentro(:)
+        if(nentro3d > 0) dentro3d(:,jlev,18)=dentro(:)
+        dentropy(:,26)=dentropy(:,26)+dentro(:)*dentrot(:,jlev)
        enddo
        dentropy(:,25)=(dftu(:,NLEP)+dentropy(:,26))/dt(:,NLEP)
        dentropy(:,26)=-dentropy(:,26)/dt(:,NLEP)
-!
-       dentropy(:,10)=0.
-       do jlev=1,NLEV
-        jlep=jlev+1
-        zdtdte(:,jlev)=-ga*(dswfl(:,jlep)-dswfl(:,jlev))                &
-     &                /(dsigma(jlev)*dp(:)*acpd*(1.+ADV*dq(:,jlev)))
-        if(nentropy > 2) then
-        dentropy(:,10)=dentropy(:,10)                                   &
-     &         +zdtdte(:,jlev)/dt(:,jlev)                               &
-     &         *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
-        else
-        dentropy(:,10)=dentropy(:,10)                                   &
-     &         +zdtdte(:,jlev)/dentrot(:,jlev)                          &
-     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)
-        endif
-       enddo
-       deallocate(zdtdte)
       endif
       if(nenergy > 0) then
        allocate(zdtdte(NHOR,NLEV))
        denergy(:,9)=0.
+       denergy(:,10)=0.
+       denergy(:,17)=0.
+       denergy(:,18)=0.
+       denergy(:,19)=0.
+       denergy(:,20)=0.
+       denergy(:,28)=0.
        do jlev=1,NLEV
         jlep=jlev+1
         denergy(:,9)=denergy(:,9)-(dlwfl(:,jlep)-dlwfl(:,jlev))  
-       enddo
-       denergy(:,17)=0.
-       do jlev=1,NLEV
-        jlep=jlev+1
-        denergy(:,17)=denergy(:,17)-(dftd(:,jlep)-dftd(:,jlev)) 
-       enddo
-       denergy(:,18)=0.
-       do jlev=1,NLEV
-        jlep=jlev+1
-        denergy(:,18)=denergy(:,18)-(dftu(:,jlep)-dftu(:,jlev))
-       enddo
-       denergy(:,19)=0.
-       do jlev=1,NLEV
-        jlep=jlev+1
-        denergy(:,19)=denergy(:,19)-(dftue1(:,jlep)-dftue1(:,jlev))
-       enddo
-       denergy(:,20)=0.
-       do jlev=1,NLEV
-        jlep=jlev+1
-        denergy(:,20)=denergy(:,20)-(dftue2(:,jlep)-dftue2(:,jlev)) 
-       enddo
-       denergy(:,28)=0.
-       do jlev=1,NLEV
-        denergy(:,28)=denergy(:,28)+dt(:,jlev)*dsigma(jlev)
-       enddo
-       denergy(:,10)=0.
-       do jlev=1,NLEV
-        jlep=jlev+1
         denergy(:,10)=denergy(:,10)-(dswfl(:,jlep)-dswfl(:,jlev))
+        denergy(:,17)=denergy(:,17)-(dftd(:,jlep)-dftd(:,jlev)) 
+        denergy(:,18)=denergy(:,18)-(dftu(:,jlep)-dftu(:,jlev))
+        denergy(:,19)=denergy(:,19)-(dftue1(:,jlep)-dftue1(:,jlev))
+        denergy(:,20)=denergy(:,20)-(dftue2(:,jlep)-dftue2(:,jlev)) 
+        denergy(:,28)=denergy(:,28)+dt(:,jlev)*dsigma(jlev)
+        if(nener3d > 0) then
+         dener3d(:,jlev,9)=-(dlwfl(:,jlep)-dlwfl(:,jlev))
+         dener3d(:,jlev,10)=-(dswfl(:,jlep)-dswfl(:,jlev))
+         dener3d(:,jlev,17)=-(dftd(:,jlep)-dftd(:,jlev))
+         dener3d(:,jlev,18)=-(dftu(:,jlep)-dftu(:,jlev))
+         dener3d(:,jlev,19)=-(dftue1(:,jlep)-dftue1(:,jlev))
+         dener3d(:,jlev,20)=-(dftue2(:,jlep)-dftue2(:,jlev))
+         dener3d(:,jlev,28)=dt(:,jlev)*dsigma(jlev)
+        endif
        enddo
        deallocate(zdtdte)
       endif
@@ -1418,6 +1384,7 @@
       real ztau(NHOR,NLEV)      ! total transmissivity
       real zq(NHOR,NLEV)        ! modified water vapour
       real zqo3(NHOR,NLEV)      ! modified ozon
+      real zqco2(NHOR,NLEV)     ! modified co2
       real ztausf(NHOR,NLEV)    ! total transmissivity to surface
       real ztaucs(NHOR,NLEV)    ! clear sky transmissivity
       real ztaucc0(NHOR,NLEV)   ! layer transmissivity cloud
@@ -1450,8 +1417,23 @@
       zco20=0.0676*(0.01022)**0.421  ! to get a(co2)=0 for co2=0
       zh2o0a=0.846*(3.59E-5)**0.243  ! to get a(h2o)=0 for h2o=0
       zh2o0=0.832*0.0286**0.26       ! to get t(h2o)=1 for h2o=0
-      zqco2=co2*zpv2pm*1.E-6         ! co2 pp mass needed for transmissivities
-                                     ! note: co2 in ppmv not ppv
+!
+!     to make a(o3) continues at 0.01cm: 
+!
+      zao3c=0.209*(0.01+7.E-5)**0.436-zao30-0.0212*log10(0.01) 
+!
+!     to make a(co2) continues at 1cm:
+!
+      zaco2c=0.0676*(1.01022)**0.421-zco20
+!
+!     to make a(h2o) continues at 0.01gm:
+!
+      zah2oc=0.846*(0.01+3.59E-5)**0.243-zh2o0a-0.24*ALOG10(0.02)
+!
+!     to make t(h2o) continues at 2gm :
+!
+      zth2oc=1.-(0.832*(2.+0.0286)**0.26-zh2o0)+0.1196*log(2.-0.6931)
+
       zsigh2(1)=0.
       zsigh2(2:NLEP)=sigmah(1:NLEV)**2
 
@@ -1494,7 +1476,6 @@
       zbu(:,NLEP)=zeps(:)*zst4(:,NLEP)
       zbue1(:,NLEP)=0.
       zbue2(:,NLEP)=zbu(:,NLEP)
-
 !
 !**   3) vertical loops
 !
@@ -1504,12 +1485,12 @@
       do jlev=1,NLEV
        jlep=jlev+1
        zzf1=sigma(jlev)*dsigma(jlev)/ga/100000.
-       zzf2=zfco2*zqco2*(zsigh2(jlep)-zsigh2(jlev))*0.5/ga/100000.
+       zzf2=zpv2pm*1.E-6                        !get co2 in pp mass (kg/kg-stp)
        zzf3=-1.66*acllwr*1000.*dsigma(jlev)/ga
        zsfac(:)=zzf1*zps2(:)
        zq(:,jlev)=zfh2o*zsfac(:)*dq(:,jlev)
        zqo3(:,jlev)=zfo3*zsfac(:)*dqo3(:,jlev)
-       zsumco2(:)=zzf2*zps2(:)
+       zqco2(:,jlev)=zfco2*zzf2*zsfac(:)*dqco2(:,jlev) 
        if(clgray > 0) then
         ztaucc0(:,jlev)=1.-dcc(:,jlev)*clgray
        else
@@ -1524,15 +1505,15 @@
        ztaucc(:)=1.
        zsumwv(:)=0.
        zsumo3(:)=0.
+       zsumco2(:)=0.
 !
 !     transmissivities
 !
        do jlev2=jlev,NLEV
         jlep2=jlev2+1
-        zzf2=zfco2*zqco2*(zsigh2(jlep2)-zsigh2(jlev))*0.5/ga/100000.
         zsumwv(:)=zsumwv(:)+zq(:,jlev2)
         zsumo3(:)=zsumo3(:)+zqo3(:,jlev2)
-        zsumco2(:)=zzf2*zps2(:)
+        zsumco2(:)=zsumco2(:)+zqco2(:,jlev2)
 !
 !     clear sky transmisivity
 !
@@ -1543,7 +1524,7 @@
         where(zsumwv(:) <= 0.01)
          zah2o(:)=0.846*(zsumwv(:)+3.59E-5)**0.243-zh2o0a
         elsewhere
-         zah2o(:)=0.24*ALOG10(zsumwv(:)+0.01)+0.622
+         zah2o(:)=0.24*ALOG10(zsumwv(:)+0.01)+zah2oc
         endwhere
 !
 !     b) continuum
@@ -1557,25 +1538,24 @@
         where(zsumco2(:) <= 1.0)
          zaco2(:)=0.0676*(zsumco2(:)+0.01022)**0.421-zco20
         elsewhere
-         zaco2(:)=0.0546*ALOG10(zsumco2(:))+0.0581
+         zaco2(:)=0.0546*ALOG10(zsumco2(:))+zaco2c
         endwhere
 !
-!     Boer et al. (1984) scheme:
+!     Boer et al. (1984) scheme for t(h2o) at co2 overlapp
 !
         where(zsumwv(:)<= 2.)
-          zth2o(:)=1.-(0.832*(zsumwv(:)+0.0286)**0.26-zh2o0)
+         zth2o(:)=1.-(0.832*(zsumwv(:)+0.0286)**0.26-zh2o0)
         elsewhere
-          zth2o(:)=max(0.,0.33-0.1196*log(zsumwv(:)-0.6931))
+         zth2o(:)=max(0.,zth2oc-0.1196*log(zsumwv(:)-0.6931))
         endwhere
 !
 !     o3 absorption:
 !
         where(zsumo3(:) <= 0.01)
-          zao3(:)= 0.209*(zsumo3(:)+7.E-5)**0.436 - zao30
+         zao3(:)= 0.209*(zsumo3(:)+7.E-5)**0.436 - zao30
         elsewhere
-          zao3(:)= 0.0212*log10(zsumo3(:))+0.0748
+         zao3(:)= 0.0212*log10(zsumo3(:))+zao3c
         endwhere
-
 !
 !     total clear sky transmissivity
 !

@@ -1,6 +1,6 @@
 /*
 
-MOST - Model Starter - Version 17 - Edilbert Kirk
+MOST - Model Starter
 ---------------------------------------------------------------------------
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -52,10 +52,11 @@ String Buffer;
 
 /* Models */
 
-#define PUMA   0
-#define SAM    1
-#define PLASIM 2
-#define MODELS 3
+#define PUMA    0
+#define SAM     1
+#define CAT     2
+#define PLASIM  3
+#define MODELS  4
 
 /* Resolutions */
 
@@ -99,6 +100,7 @@ char *ShortModelName[MODELS] =
 {
    "puma",
    "sam",
+   "cat",
    "plasim"
 };
 
@@ -106,6 +108,7 @@ char *FullModelName[MODELS] =
 {
    "PUMA",
    "SAM",
+   "CAT",
    "Planet Simulator"
 };
 
@@ -133,8 +136,6 @@ double *OroPrep;   // Preprocessed Orography
 Pixmap OpmEarth;
 Pixmap OpmMars;
 Pixmap OpmPrep;
-
-int OroSize = 129 * 64 * sizeof(double);;
 
 double RevGra = 1.0 / 9.81;
 
@@ -207,7 +208,14 @@ struct SelStruct *SelCPU;
 struct SelStruct *SelMulti;
 struct SelStruct *SelLat2;
 
-#define DIMLOGO 3
+
+// Title lines for the entry of resolution
+
+char *DimText1;
+char *DimText2;
+char *DimText3;
+
+#define DIMLOGO 4
 
 struct SymbolStruct 
 {
@@ -335,12 +343,15 @@ int Preprocessed;
 int SAMindex;
 int ScreenHeight;
 int Expert = 1;
+int CatEnabled;
+int SamEnabled;
 int LsgEnabled;
 int ModeRadiusSq;
 int ForceRebuild;
 int dxsh;
 int dxs2;
-int Yoden;
+int Yoden;                // PUMA setup for Yoden experiment
+int CatSim = 51;          // simulation setup number for CAT
 
 /* Special parameter */
 
@@ -566,7 +577,7 @@ void ChangeModel(int NewMo)
    int i;
    struct SelStruct *Sel;
 
-   if (NewMo < 0) // locate actice model
+   if (NewMo < 0) // locate active model
    {
       NewMo = PUMA; // default if none is specified
       for (i=0 , Sel = SelMod ; i < MODELS; ++i , Sel = Sel->Next)
@@ -607,6 +618,34 @@ void ChangeModel(int NewMo)
           if (SelLsg) SelLsg->no = 0;
           for (i=0 ; i < PLANETS ; ++i) SelPlanet[i]->no = 0;
        }
+   }
+   if (Expert)
+   {
+      if (NewMo == CAT)
+      {
+         strcpy(DimText1,"NGX          ");
+         strcpy(DimText2,"NGY          ");
+      }
+      else
+      {
+         strcpy(DimText1,"Latitudes #1 ");
+         strcpy(DimText2,"Latitudes #2 ");
+      }
+   }
+   else
+   {
+      if (NewMo == CAT)
+      {
+         strcpy(DimText1,"[  64 x 64  ]");
+         strcpy(DimText2,"[ 256 x 256 ]");
+         strcpy(DimText3,"[1024 x 1024]");
+      }
+      else
+      {
+         strcpy(DimText1,"T21   [64x32]");
+         strcpy(DimText2,"T31   [96x48]");
+         strcpy(DimText3,"T42  [128x64]");
+      }
    }
    Model = NewMo;
 }
@@ -696,7 +735,7 @@ void UpdateSelections(struct SelStruct *Sel)
          strcpy(Sel->teva,text);
       }
    }
-   if (SelLat2) SelLat2->no = (SelMulti->iv != 2) ;
+   // if (SelLat2) SelLat2->no = (SelMulti->iv != 2) ;
 }
 
 
@@ -1008,13 +1047,22 @@ void InitNamelist(void)
    NL_r(PUMA,"puma","SYNCSTR",  0.0);
    NL_r(PUMA,"puma","ROTSPD" ,  1.0);
    NL_r(PUMA,"puma","TGR"    , 288.0);
-};
 
+   // CAT
 
-void ReadNamelist(void)
-{
+   NL_r(CAT,"cat","ALPHA"    ,  0.0);
+   NL_r(CAT,"cat","BETA"     ,  0.0);
+   NL_r(CAT,"cat","AFORC"    ,  0.001);
+   NL_r(CAT,"cat","TFORC"    ,  0.01);
+   NL_i(CAT,"cat","NFORC"    ,  0);
+   NL_i(CAT,"cat","NGUIDBG"  ,  0);
+   NL_i(CAT,"cat","NPOST"    ,  0);
+   NL_i(CAT,"cat","NSIM"     ,  0);
+   NL_i(CAT,"cat","KFMIN"    ,  0);
+   NL_i(CAT,"cat","KFMAX"    ,  8);
+   NL_i(CAT,"cat","JACMTHD"  ,  1);
+   NL_i(CAT,"cat","NSTEPS"  ,   10000);
 }
-
 
 void NamelistSelector(int model)
 {
@@ -1191,6 +1239,27 @@ void InitSelections(void)
    Sel = NewSel(Sel);
    InitNextSelection(Sel,dyn,"SAM");
 
+   // Hide SAM ?
+
+   if (!SamEnabled)
+   {
+      Sel->no = 1;
+      Sel->lt = 0;
+   }
+
+   // CAT
+
+   Sel = NewSel(Sel);
+   InitNextSelection(Sel,dyn,FullModelName[CAT]);
+
+   // Hide CAT until released
+
+   if (!CatEnabled)
+   {
+      Sel->no = 1;
+      Sel->lt = 0;
+   }
+
    // Planet Simulator
 
    Sel = NewSel(Sel);
@@ -1341,13 +1410,14 @@ void InitSelections(void)
       Sel->type = SEL_INT;
       Sel->div  = Sel->iv = Latitudes;
       Sel->piv  = &Latitudes;
+      DimText1  = Sel->text;
 
       Sel = NewSel(Sel);
       InitNextSelection(Sel,dys,"Latitudes #2");
       Sel->div  = Sel->iv = Latitudes;
       Sel->piv  = &Latitude2;
-      Sel->no   = 1;
       SelLat2   = Sel;
+      DimText2  = Sel->text;
    }
    else
    {
@@ -1359,6 +1429,7 @@ void InitSelections(void)
       Sel->yt   = Sel->y + FixFont->ascent + 1;
       Sel->div  = Sel->iv   =  1;
       SelRes    = Sel;
+      DimText1  = Sel->text;
 
       Sel = NewSel(Sel);
       InitNextSelection(Sel,dyn,"T31   [96x48]");
@@ -1366,6 +1437,7 @@ void InitSelections(void)
       Sel->h    = FixFontHeight + 1;
       Sel->w    = FixFontHeight + 1;
       Sel->div  = Sel->iv   =  0;
+      DimText2  = Sel->text;
 
       Sel = NewSel(Sel);
       InitNextSelection(Sel,dyn,"T42  [128x64]");
@@ -1373,6 +1445,7 @@ void InitSelections(void)
       Sel->h    = FixFontHeight + 1;
       Sel->w    = FixFontHeight + 1;
       Sel->div  = Sel->iv   =  0;
+      DimText3  = Sel->text;
    }
 
    // Vertical resolution
@@ -1617,26 +1690,24 @@ void InitLogo(void)
    ++n;
    strcpy(Logo[n].t[0],FullModelName[PLASIM]);
 
-/*
-   Logo[n].x = 350;
-   Logo[n].y = 8;
-   Logo[n].w = DIMX_LOGO_PLASIM;
-   Logo[n].h = DIMY_LOGO_PLASIM;
-   Logo[n].b = Blue.pixel;
-   Logo[n].f = WhitePix;
-   strcpy(Logo[n].t[0],"Planet");
-   strcpy(Logo[n].t[1],"Simulator");
-   Logo[n].i    = pixelplasim;
-*/
+   // Cat
 
-   Logos = n;
+   ++n;
+   strcpy(Logo[n].t[0],FullModelName[CAT]);
+
+   Logos = n+1;
 }
 
 void GenerateNames(void)
 {
    Truncation = (2 * Latitudes - 1) / 3;
    sprintf(namelist_name,"%s_namelist",ShortModelName[Model]);
-   if (Model == PUMA)
+   if (Model == CAT)
+   {
+      if (Cores < 2) strcpy(exec_name,"most_cat.x");
+      else           strcpy(exec_name,"most_cat_mpi.x");
+   }
+   else if (Model == PUMA)
    {
       if (Cores < 2) strcpy(exec_name,"most_puma.x");
       else           strcpy(exec_name,"most_puma_mpi.x");
@@ -1669,6 +1740,11 @@ int WriteRunScript(int model)
    char run[256];
 
    strcpy(exec_nam2,exec_name); // Duplicate exec name
+
+   if (model == CAT) // Add Dimensions
+   {
+      sprintf(exec_name+strlen(exec_name)," %d %d",Latitudes,Latitude2);
+   }
 
    if (model == PUMA) // Add Latitudes and Levels as arguments
    {
@@ -1749,8 +1825,10 @@ int WriteRunScript(int model)
    {
       fprintf(fp,"   [ -e %s ] && mv %s $DATANAME\n",outp_name,outp_name);
       fprintf(fp,"   [ -e %s ] && mv %s $DIAGNAME\n",diag_name,diag_name);
-      fprintf(fp,"   cp %s_status %s_restart\n",ShortModelName[model],ShortModelName[model]);
-      fprintf(fp,"   mv %s_status $RESTNAME\n",ShortModelName[model]);
+      fprintf(fp,"   [ -e %s_status ] && cp %s_status %s_restart\n",
+              ShortModelName[model],ShortModelName[model],ShortModelName[model]);
+      fprintf(fp,"   [ -e %s_status ] && mv %s_status $RESTNAME\n",
+              ShortModelName[model],ShortModelName[model]);
    }
    if (ngui) fputs("# ",fp); /* deactivate loop for GUI case */
    fputs("done\n",fp);
@@ -1924,6 +2002,7 @@ int Build(int model)
    {
       putenv("GUIMOD=guimod_stub");
       putenv("PUMAX=pumax_stub");
+      putenv("GUIX11=guix11_stub");
       putenv("GUILIB=");    
    }
    if (Planet == MARS) putenv("PLAMOD=p_mars");
@@ -1978,6 +2057,16 @@ int Build(int model)
    sprintf(command,"cp %s/bin/%s %s/run\n",shomo,exec_name,shomo);
    system(command);
 
+   // copy CAT simulation namelist to run directory
+
+   if (model == CAT)
+   {
+      sprintf(command,"cp cat/dat/sim_%4.4d.nl cat/run/sim_namelist\n",CatSim);
+      system(command);
+   }
+
+   // copy hires background bitmap for Earth or Mars
+
    if (model == PUMA || model == PLASIM )
    {
        if (model == PLASIM && Planet == MARS)
@@ -1991,6 +2080,9 @@ int Build(int model)
           system(command);
        }
    }
+
+   // copy surface data in matching resolution to run directory
+
    if (model == PLASIM)
    {
       if (Planet == MARS)
@@ -2000,8 +2092,8 @@ int Build(int model)
       else
          sprintf(command,"cp plasim/dat/T%d/* plasim/run/\n",Truncation);
       system(command);
-      system(command);
-      if (Lsg)
+
+      if (Lsg) // copy data for LSG ocean model and select LSG GUI configuration
       {    
          sprintf(command,"cp lsg/dat/* %s/run\n",shomo);
          system(command);
@@ -2019,6 +2111,9 @@ int Build(int model)
       sprintf(command,"cp %s/dat/GUI.cfg %s/run\n",shomo,shomo);
       system(command);
    }
+
+   // copy second GUI configuration for two-instances run
+
    if (Multirun > 1)
    {
       sprintf(command,"cp %s/dat/GUI_0?.cfg %s/run\n",shomo,shomo);
@@ -2109,10 +2204,13 @@ void FinishLine(void)
       FormatReal(CursorSel->fv,text);
       strcpy(CursorSel->teva,text);
    }
+
+/*
    if (CursorSel == SelMulti)  // Enable or disable Lat2
    {
       SelLat2->no = (SelMulti->iv != 2) ;
    }
+*/
    if (OldCores == 1 && Cores  > 1) ForceRebuild = 1;
    if (OldCores  > 1 && Cores == 1) ForceRebuild = 1;
    if (Model == PLASIM && OldCores != Cores) ForceRebuild = 1;
@@ -2185,6 +2283,43 @@ int CheckPumaNamelist(void)
       Multirun   = SelMulti->iv = 2;
       Cores = SelCPU->iv   = 1;
    }
+   return 0; /* Success */
+}
+
+
+int CheckCATNamelist(void)
+{
+   int i,safe_ntspd;
+   int *ntspd;
+   int *nyoden = NULL;
+   double s;
+   struct SelStruct *Sel;
+   FILE *fp;
+
+   FinishLine();
+
+/*
+   for (Sel = &SelStart ; Sel ; Sel = Sel->Next)
+   {
+      if (Sel->piv) *Sel->piv = Sel->iv;
+      if (!strcmp(Sel->text,"NTSPD"       )) ntspd    = &Sel->iv;
+      if (!strcmp(Sel->text,"NYODEN"      )) nyoden   = &Sel->iv;
+      if (!strcmp(Sel->text,"Orography"   )) nreadsr  = Sel->iv;
+      if (!strcmp(Sel->text,"Annual cycle")) nac      = Sel->iv;
+   }
+*/
+
+   // Check for resolution
+
+        if (Resolution == 1)
+      Latitudes = Latitude2 = 64;
+   else if (Resolution == 2)
+      Latitudes = Latitude2 = 256;
+   else if (Resolution == 3)
+      Latitudes = Latitude2 = 1024;
+
+   if (Debug) printf("NGX = NGY = %d\n",Latitudes);
+
    return 0; /* Success */
 }
 
@@ -2439,6 +2574,55 @@ int WritePumaNamelist(void)  /* also used for model SAM */
       fprintf(fp," /END\n");
       fclose(fp);
    }
+   return 1; /* Success */
+}
+
+
+/* ================ */
+/* WriteCatNamelist */
+/* ================ */
+
+int WriteCatNamelist(void)
+{
+   int i,j,k,sum,val;
+   FILE *fp;
+   char backup_name[256];
+   char nln[256];
+   struct SelStruct *Sel;
+
+   FinishLine();
+
+   // Write file <cat_namelist>
+
+   strcpy(nln,ShortModelName[Model]);
+   strcat(nln,"/run/");
+   strcat(nln,namelist_name);
+   fp = fopen(nln,"w");
+   if (fp == NULL)
+   {
+      printf("Could not open file <%s> for writing\n",nln);
+      return 0; /* Failure */
+   }
+
+   fprintf(fp," &%s_nl\n",ShortModelName[Model]);
+
+   fprintf(fp," %-8s=%6d\n","NGUI"    ,ngui);
+
+   for (Sel = ComEnd->Next ; Sel ; Sel = Sel->Next)
+   {
+      if (Sel->type == SEL_INT)
+         fprintf(fp," %-8s=%6d\n",Sel->text,Sel->iv);
+      if (Sel->type == SEL_REAL)
+         fprintf(fp," %-8s=%s\n",Sel->text,Sel->teva);
+      if (!strncmp(Sel->text,"NSIM",4))
+      {
+         if (Sel->iv > 0) CatSim = Sel->iv;
+      }
+   }
+
+   fprintf(fp," /END\n");
+   fclose(fp);
+
    return 1; /* Success */
 }
 
@@ -3024,7 +3208,7 @@ void ShowModeSelector(void)
    yp += dx;
    XDrawImageString(display,pix,gc,xp,yp,Text,len);
 
-   strcpy(Text,"MB 3: Toggle line");
+   strcpy(Text,"MB 3: Toggle row");
    len = strlen(Text);
    yp += dx;
    XDrawImageString(display,pix,gc,xp,yp,Text,len);
@@ -3268,6 +3452,14 @@ void BuildScripts(void)
       WritePumaNamelist();
       if (!Build(SAM)) Exit();
       WriteRunScript(SAM);
+   }
+   if (Model == CAT)
+   {
+      if (CheckCATNamelist()) return;
+      GenerateNames();
+      WriteCatNamelist();
+      if (!Build(CAT)) Exit();
+      WriteRunScript(CAT);
    }
    if (Model == PLASIM)
    {
@@ -4118,7 +4310,7 @@ int RedrawControlWindow(void)
    ShowOrography();
    ShowFrame1();
    ShowButtons();
-   for (l=0 ; l < 3 ; ++l)
+   for (l=0 ; l < Logos ; ++l)
    {
       XPutImage(display,Cow,gc,Logo[l].X,0,0,Logo[l].x,Logo[l].y,Logo[l].w,Logo[l].h);
    }
@@ -4298,6 +4490,20 @@ void InitGUI(void)
       fclose(xpp);
    }
 
+   xpp = fopen("cat","r"); // Cat enabled
+   if (xpp)
+   {
+      CatEnabled = 1;
+      fclose(xpp);
+   }
+
+   xpp = fopen("sam","r"); // Sam enabled
+   if (xpp)
+   {
+      SamEnabled = 1;
+      fclose(xpp);
+   }
+
    xpp = fopen("lsg/src/lsgmod.f90","r"); // LSG there ?
    if (xpp)
    {
@@ -4327,7 +4533,8 @@ void InitGUI(void)
    InitLogo();
    ReadLogo(0,"images/KC-Logo_RGB.bmp");
    ReadLogo(1,"images/puma.bmp");
-   ReadLogo(2,"images/plasim.bmp");
+   ReadLogo(2,"images/cat.bmp");
+   ReadLogo(3,"images/plasim.bmp");
    ReadImage(&MapHRE,"images/earth.bmp");
    ReadImage(&MapHRM,"images/mars.bmp");
    ReadImage(&MapLRK,"images/Kepler-16.bmp");
@@ -4339,10 +4546,11 @@ void InitGUI(void)
    
    ChangeModel(PLASIM);
    NamelistSelector(PLASIM);
+   ChangeModel(CAT);
+   NamelistSelector(CAT);
    ChangeModel(SAM);
    NamelistSelector(SAM);
    ChangeModel(PUMA);
-   //AddPumaNamelist();
    NamelistSelector(PUMA);
 
    if (ReadSettings(cfg_file))
@@ -4432,12 +4640,15 @@ void OnMouseClick(void)
    /* Check for model switch */
 
    for (i = PUMA , Sel = SelMod ; i < MODELS ; ++i , Sel = Sel->Next)
-   if (HitBox(Sel) && Model != i)
    {
-      if (Debug) printf("Change model from %d to %d\n",Model,i);
-      ChangeModel(i);
-      CalcFrame(Latitudes);
-      return;
+      if (HitBox(Sel) && Model != i)
+      {
+         if (i == CAT && !CatEnabled) return; // Hide CAT
+         if (Debug) printf("Change model from %d to %d\n",Model,i);
+         ChangeModel(i);
+         CalcFrame(Latitudes);
+         return;
+      }
    }
 
    /* Continue with all other boxes */
