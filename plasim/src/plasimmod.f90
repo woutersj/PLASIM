@@ -30,7 +30,7 @@
 !     * NPRO_ATM, NLAT_ATM, NLEV_ATM                                 *
 !     ****************************************************************
 
-!      use resmod
+      use resmod
 
 !     ****************************************************************
 !     * The number of processes for processing on parallel machines  *

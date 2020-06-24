@@ -43,6 +43,7 @@ set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g")
 
 set(PLASIM_F_SRCS  plasimmod.f90  calmod.f90  fftmod.f90  lsgmod.f90
                    p_${planet}.f90  rainmod.f90  surfmod.f90
+                   resmod_stub.f90
                    fluxmod.f90  icemod.f90  miscmod.f90  oceanmod.f90
                    restartmod.f90  tpcore.f90  gaussmod.f90  landmod.f90
                    mpimod.f90  radmod.f90  seamod.f90  tracermod.f90

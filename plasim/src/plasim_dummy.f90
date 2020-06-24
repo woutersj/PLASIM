@@ -1,5 +1,5 @@
       module pumamod
-!      use resmod
+      use resmod
 !
 !     Parameter
 !
