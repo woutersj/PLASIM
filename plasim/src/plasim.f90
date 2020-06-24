@@ -135,6 +135,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
       use pumamod
 
       logical :: lrestart
+      integer :: i, clock
 
 !     ************************************************************
 !     * Initializations that cannot be run on parallel processes *
@@ -377,6 +378,13 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 
       if (nrestart > 0) then
          call read_atmos_restart
+         if (mypid == NROOT .and. restart_kick > 0) then
+            call system_clock(count=clock)
+            meed(:) = clock + 37 * (/(i,i=1,nseedlen)/)
+            call random_seed(put=meed) ! make sure the noise is different for different realizations. The seed is read from the restart file
+            call printseed
+            call noise
+         endif
       else
          call initfd
       endif
@@ -480,11 +488,6 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 
       subroutine master
       use pumamod
-      
-      
-      if (nrestart > 0 .and. restkick > 0) then
-         call noise
-      endif
 
 !     ***************************
 !     * short initial timesteps *
@@ -503,6 +506,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
          call spectrald
          nkits = nkits - 1
       enddo
+
 !     ****************************************************************
 !     * The scaling factor "ww" is derived from the rotation "omega" *
 !     * with 1 planetary rotation per sidereal day (2 Pi) of Earth   *
@@ -815,7 +819,6 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
          call get_restart_integer('nstep'   ,nstep)
          call get_restart_integer('naccuout',naccuout)
          call get_restart_seed('seed',meed,nseedlen)
-         meed = meed + mrpid + clock
          call get_restart_array('sz',sz,NRSP,NESP,NLEV)
          call get_restart_array('sd',sd,NRSP,NESP,NLEV)
          call get_restart_array('st',st,NRSP,NESP,NLEV)
@@ -1092,6 +1095,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 
 !     Print some values
 
+      write(nud,'("* Restart kick     :",i6,"       *")') restkick
       write(nud,'(/,"**********************************")')
       write(nud,'("* Solar    day     :",f8.1," [s] *")') solar_day
       write(nud,'("* Sidereal day     :",f8.1," [s] *")') sidereal_day
@@ -1588,11 +1592,11 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
          jsp1=2*NTP1+1
          do jsp=jsp1,NRSP
             call random_number(zrand)
-!            if (mrpid > 0) zrand = zrand + mrpid * 0.01
+            if (mrpid > 0) zrand = zrand + mrpid * 0.01
             sp(jsp)=sp(jsp)+zscale*(zrand-0.5)
          enddo
          write(nud,'(" *     White noise added (KICK = 1)      *")')
-         write(nud,*) epskick
+	 write(nud,'("* Noise strength     :",f8.3,"       *")') epskick
       elseif (kick == 2) then
          jr=2*NTP1-1
          do jm=1,NTRU

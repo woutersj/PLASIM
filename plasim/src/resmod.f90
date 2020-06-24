@@ -2,5 +2,5 @@
 
       parameter(NLAT_ATM = 64)
       parameter(NLEV_ATM = 10)
-      parameter(NPRO_ATM = 1)
+      parameter(NPRO_ATM = 2)
       end module resmod
