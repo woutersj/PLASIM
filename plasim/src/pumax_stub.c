@@ -1,3 +1,5 @@
+#ifndef USE_GUI
+
 #include <sys/resource.h>
 
 void pumax_dummy(void) {}
@@ -43,3 +45,5 @@ int nresources(double *ut, double *st, long *mem, long *par, long *paf,
 {
    return nresources_(ut,st,mem,par,paf,swa,dr,dw);
 }
+
+#endif

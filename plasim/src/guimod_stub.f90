@@ -1,6 +1,8 @@
 ! Dummy module replacement for guimod.f90
 ! Use this for environments with no X11
 
+#ifndef USE_GUI
+
 subroutine guistart
 return
 end subroutine guistart
@@ -58,3 +60,4 @@ character (len=*) :: yn
 return
 end subroutine guihorlsg
 
+#endif
