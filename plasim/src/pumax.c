@@ -17,8 +17,6 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifdef USE_GUI
-
 int Debug = 0; // set in initgui
 
 #include <ctype.h>
@@ -4721,5 +4719,3 @@ int nresources(double *ut, double *st, long *mem, long *par, long *paf,
 {
    return nresources_(ut,st,mem,par,paf,swa,dr,dw);
 }
-
-#endif

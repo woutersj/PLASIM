@@ -1,6 +1,6 @@
       module icemod
 
-      use resmod
+!      use resmod
 !
 !     version identifier (date)
 !

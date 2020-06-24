@@ -28,11 +28,9 @@
 !     ****************************************************************
 !     * The module resmod defines all resolution parameters          *
 !     * NPRO_ATM, NLAT_ATM, NLEV_ATM                                 *
-!     * If MPI (Message Passing Interface) is to be used it will     *
-!     * also include a 'use mpi' statement                           *
 !     ****************************************************************
 
-      use resmod
+!      use resmod
 
 !     ****************************************************************
 !     * The number of processes for processing on parallel machines  *

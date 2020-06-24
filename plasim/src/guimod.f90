@@ -12,8 +12,6 @@
 ! *********************************************
 
 
-#ifdef USE_GUI
-
 ! ===================
 ! SUBROUTINE GUISTART
 ! ===================
@@ -421,5 +419,3 @@ if (mypid == NROOT) then
 endif
 return
 end
-          
-#endif
