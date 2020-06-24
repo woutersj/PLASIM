@@ -31,8 +31,8 @@ add_compile_definitions(NLAT_ATM=${nlat})
 add_compile_definitions(NLEV_ATM=${nlev})
 add_compile_definitions(NPRO_ATM=${npro})
 
-set (CMAKE_Fortran_FLAGS_RELEASE "-cpp -funroll-all-loops -fno-f2c -O3")
-set (CMAKE_Fortran_FLAGS "-cpp -funroll-all-loops -fno-f2c -O3")
+set (CMAKE_Fortran_FLAGS_RELEASE "-cpp -funroll-all-loops -fno-f2c -O3 -std=legacy")
+set (CMAKE_Fortran_FLAGS "-cpp -funroll-all-loops -fno-f2c -O3 -std=legacy")
 set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g")
 
 set(PLASIM_F_SRCS  plasimmod.f90  calmod.f90  fftmod.f90  lsgmod.f90
@@ -80,6 +80,8 @@ endif()
 
 # installation
 INSTALL(TARGETS ${PLASIM_BIN} DESTINATION bin)
+INSTALL(DIRECTORY ../dat DESTINATION share/plasim)
+INSTALL(DIRECTORY ../namelists DESTINATION share/plasim)
 
 #SET(CPACK_GENERATOR "DEB" "RPM")
 #SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Jeroen Wouters") #required

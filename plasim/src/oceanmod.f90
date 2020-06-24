@@ -47,7 +47,7 @@
 !
       real :: dlayer(NLEV_OCE)  = 50.   ! layer depth (m)
       real :: taunc             =  0.   ! newtonian cooling timescale (d)
-      real :: vdiffkl(NLEV_OCE) = 1.E-4 ! vertikal diffusion coeff. [m**2/s]
+      real :: vdiffkl(NLEV_OCE) = 1.E-4 ! vertical diffusion coeff. [m**2/s]
       real :: hdiffk(NLEV_OCE)  = 1.E3  ! horizontal diffusion coeff. [m**2/s]
 !
 !     global integer
@@ -69,7 +69,7 @@
       real :: cphi(NLAT)                ! cos(latitude)
       real :: cphih(0:NLAT)             ! cos(latitude) at grid bounds
       real :: dmue(NLAT)                ! delta sin(phi) (phi at bound) = -gw
-      real :: vdiffk(NLEV_OCE)          ! vertikal diffusion coeff interpol.
+      real :: vdiffk(NLEV_OCE)          ! vertical diffusion coeff interpol.
 !
       real :: gw(NHOR)                  ! gaussian weights
 !
@@ -225,7 +225,7 @@
          ymld(:,jlev) = dlayer(jlev)
       enddo
       if(NLEV_OCE > 1) then
-       do jlev=1,nlem_oce
+       do jlev=1,(NLEV_OCE-1)
           vdiffk(jlev)=(dlayer(jlev)*vdiffkl(jlev)                      &
      &                 +dlayer(jlev+1)*vdiffkl(jlev+1))                 &
      &                /(dlayer(jlev)+dlayer(jlev+1)) 

@@ -378,7 +378,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 
       if (nrestart > 0) then
          call read_atmos_restart
-         if (mypid == NROOT .and. restart_kick > 0) then
+         if (mypid == NROOT .and. restkick > 0) then
             call system_clock(count=clock)
             meed(:) = clock + 37 * (/(i,i=1,nseedlen)/)
             call random_seed(put=meed) ! make sure the noise is different for different realizations. The seed is read from the restart file

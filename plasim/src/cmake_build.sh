@@ -1,4 +1,13 @@
 #!/bin/bash
 mkdir build
 cd build
-cmake -Dnlat=64 -Dnlev=10 -Dnpro=4 -DCMAKE_INSTALL_PREFIX=/home/jeroen/.local/ .. && make && make install
+for NLAT in 32 64
+do
+  for NLEV in 10 20
+  do
+    for NPRO in 2 4
+    do
+      cmake -Dnlat=${NLAT} -Dnlev=${NLEV} -Dnpro=${NPRO} -DCMAKE_INSTALL_PREFIX=/home/jeroen/.local/ .. && make && make install		
+    done
+  done
+done
