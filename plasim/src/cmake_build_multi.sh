@@ -4,7 +4,7 @@ mkdir build
 cd build
 for NLAT in 32 64
 do
-  for NLEV in 10 20
+  for NLEV in 5 10 20
   do
     for NPRO in 2 4
     do

@@ -13,10 +13,9 @@
     nguidbg = 0
     nqspec = 1
     nveg = 0
-    nwpd = 2 
+    nwpd = 1
     nprint = 0
     nsync = 0
     syncstr = 0.0
-    nperpetual = 140
-    restkick = 1
+    restkick = 0
 /

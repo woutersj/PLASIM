@@ -55,7 +55,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
       call epilog
       call mpstop
 
-      stop
+!      stop
       end
 
       ! ***************************
