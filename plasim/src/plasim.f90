@@ -1733,7 +1733,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
       write (nud,9010)
       write (nud,9020)
       return
- 9000 format('* seed(',i1,') = ',i10,' *')
+ 9000 format('* seed(',i1,') = ',i16,' *')
  9010 format('************************')
  9020 format(/)
       end
