@@ -6,8 +6,8 @@ Gerneral Circulation Models Planet Simulator (PlaSim) and PUMA. These models are
 ## Documentation
 Manuals are located in:
 
-- puma/doc for the PUMA model
-- plasim/doc for the Planet Simulator
+- [puma/doc]() for the PUMA model
+- [plasim/doc]() for the Planet Simulator
 
 ## Installation ##
 To build PlaSim using CMake:
