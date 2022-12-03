@@ -58,7 +58,7 @@ foreach(nlev ${nlevs})
 foreach(npro ${npros})
     # ntru = floor( (2*nlat-1) / 3 ), floor is performed automatically upon conversion to int
     math(EXPR ntru "(2*${nlat} - 1)/3")
-    message(STATUS "spectral truncation='${ntru}'")
+    # message(STATUS "spectral truncation='${ntru}'")
 
     # Set a directory to store resolution specific Fortran modules. We are building many copies with the same name, but different resolutions. Otherwise their modules clash in a parellel make (e.g. -j4).
     set( CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Mod_t${ntru}_l${nlev}_p${npro} )
@@ -95,8 +95,8 @@ endforeach()
 endforeach()
 
 # install data
-INSTALL(DIRECTORY ../dat DESTINATION share/plasim)
-INSTALL(DIRECTORY ../namelists DESTINATION share/plasim)
+INSTALL(DIRECTORY ../dat/ DESTINATION share/plasim)
+#INSTALL(DIRECTORY ../namelists DESTINATION share/plasim)
 
 #SET(CPACK_GENERATOR "DEB" "RPM")
 #SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Jeroen Wouters") #required
