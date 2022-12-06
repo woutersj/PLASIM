@@ -30,7 +30,7 @@ set (CMAKE_Fortran_FLAGS "-cpp -funroll-all-loops -fno-f2c -O3 -std=legacy")
 set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g")
 
 set(PLASIM_F_SRCS plasimmod.f90 icemod.f90 oceanmod.f90 resmod_stub.f90 mpimod.f90
-                  guimod_stub.f90 tracermod.f90 surfmod.f90 rainmod.f90 outmod.f90
+                  tracermod.f90 surfmod.f90 rainmod.f90 outmod.f90
                   radmod.f90 legmod.f90 landmod.f90
                   calmod.f90  fftmod.f90 lsgmod.f90 p_${planet}.f90
                   fluxmod.f90 miscmod.f90 restartmod.f90 tpcore.f90 gaussmod.f90 
