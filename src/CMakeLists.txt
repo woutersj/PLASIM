@@ -1,3 +1,5 @@
+set(PLASIM_BIN plasim)
+
 #
 # Set build options
 #
@@ -76,6 +78,7 @@ list(TRANSFORM PLASIM_C_SRCS PREPEND plasim/)
 
 if(WITH_LSG)
     list(APPEND PLASIM_F_SRCS lsg/lsgmod.f90)
+    set(PLASIM_BIN ${PLASIM_BIN}-lsg)
 else()
     list(APPEND PLASIM_F_SRCS plasim/lsgmod_stub.f90)
 endif() 
@@ -94,7 +97,7 @@ foreach(npro ${npros})
     # Set a directory to store resolution specific Fortran modules. We are building many copies with the same name, but different resolutions. Otherwise their modules clash in a parellel make (e.g. -j4).
     set( CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Mod_t${ntru}_l${nlev}_p${npro} )
     
-    set(PLASIM_BIN plasim_t${ntru}_l${nlev}_p${npro})
+    set(PLASIM_BIN ${PLASIM_BIN}_t${ntru}_l${nlev}_p${npro})
     message(STATUS "PLASIM_BIN='${PLASIM_BIN}'")
     
     add_executable(${PLASIM_BIN} plasim/plasim.f90 ${PLASIM_C_SRCS} ${PLASIM_F_SRCS})
