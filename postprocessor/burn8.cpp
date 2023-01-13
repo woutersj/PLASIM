@@ -1138,7 +1138,7 @@ void NetWriteSection(int code, double *Var)
       startp.push_back(0);
       startp.push_back(0);
    //    All[code].NetVar->set_cur(OutputCount,jlev);
-      All[code].NetVar->putVar(startp,countp,Record_float);
+      All[code].NetVar.putVar(startp,countp,Record_float);
    }
 }
 
