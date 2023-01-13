@@ -1048,7 +1048,6 @@ void NetWrite32(int code, double *Var)
          NetBuffer(Var,Record_float);
          if (code==WCODE)
             NetScale(Record_float,Lats*(Lons+Cyclical),0.01);
-         // All[code].NetVar->set_cur(OutputCount,jlev);
          vector<size_t> startp,countp;
          countp.push_back(1);
          countp.push_back(1);
@@ -1058,6 +1057,7 @@ void NetWrite32(int code, double *Var)
          startp.push_back(jlev);
          startp.push_back(0);
          startp.push_back(0);
+         // All[code].NetVar->set_cur(OutputCount,jlev);
          All[code].NetVar.putVar(startp,countp,Record_float);
       }
    }
@@ -1068,25 +1068,41 @@ void NetWrite64(int code, double *Var)
 {
    int jlev;
 
-   // if (All[code].twod)
-   // {
-   //    memcpy(Record_double,Var,DimGP * sizeof(double));
-   //    if (code==SLPCODE || code==PSCODE)
-   //       NetScale(Record_double,Lats*(Lons+Cyclical),0.01);
+   if (All[code].twod)
+   {
+      memcpy(Record_double,Var,DimGP * sizeof(double));
+      if (code==SLPCODE || code==PSCODE)
+         NetScale(Record_double,Lats*(Lons+Cyclical),0.01);
+         vector<size_t> startp,countp;
+         countp.push_back(1);
+         countp.push_back(Lats);
+         countp.push_back(Lons+Cyclical);
+         startp.push_back(OutputCount);
+         startp.push_back(0);
+         startp.push_back(0);
    //    All[code].NetVar->set_cur(OutputCount);
-   //    All[code].NetVar->put(Record_double,1,Lats,Lons+Cyclical);
-   // }
-   // else
-   // {
-   //    for (jlev = 0 ; jlev < OutLevs ; ++jlev, Var += DimGP)
-   //    {
-   //       memcpy(Record_double,Var,DimGP * sizeof(double));
-   //       if (code==WCODE)
-   //          NetScale(Record_double,Lats*(Lons+Cyclical),0.01);
-   //       All[code].NetVar->set_cur(OutputCount,jlev);
-   //       All[code].NetVar->put(Record_double,1,1,Lats,Lons+Cyclical);
-   //    }
-   // }
+         All[code].NetVar.putVar(startp,countp,Record_double);
+   }
+   else
+   {
+      for (jlev = 0 ; jlev < OutLevs ; ++jlev, Var += DimGP)
+      {
+         memcpy(Record_double,Var,DimGP * sizeof(double));
+         if (code==WCODE)
+            NetScale(Record_double,Lats*(Lons+Cyclical),0.01);
+         vector<size_t> startp,countp;
+         countp.push_back(1);
+         countp.push_back(1);
+         countp.push_back(Lats);
+         countp.push_back(Lons+Cyclical);
+         startp.push_back(OutputCount);
+         startp.push_back(jlev);
+         startp.push_back(0);
+         startp.push_back(0);
+   //    All[code].NetVar->set_cur(OutputCount,jlev);
+         All[code].NetVar.putVar(startp,countp,Record_double);
+      }
+   }
 }
 
 
@@ -1095,26 +1111,35 @@ void NetWriteSection(int code, double *Var)
    int jvar,jlev;
    double *vp;
 
-   // for (jlev = 0 ; jlev < OutLevs ; ++jlev)
-   // {
-   //    vp = Var + jlev * DimFC;
-   //    if (code==SLPCODE || code==PSCODE || code==WCODE) 
-   //    {
-   //       for (jvar = 0 ; jvar < Lats ; ++jvar)
-   //       {
-   //          Record_float[jvar] = vp[jvar] * 0.01;
-   //       }
-   //    }
-   //    else
-   //    {
-   //       for (jvar = 0 ; jvar < Lats ; ++jvar)
-   //       {
-   //          Record_float[jvar] = vp[jvar];
-   //       }
-   //    }
+   for (jlev = 0 ; jlev < OutLevs ; ++jlev)
+   {
+      vp = Var + jlev * DimFC;
+      if (code==SLPCODE || code==PSCODE || code==WCODE) 
+      {
+         for (jvar = 0 ; jvar < Lats ; ++jvar)
+         {
+            Record_float[jvar] = vp[jvar] * 0.01;
+         }
+      }
+      else
+      {
+         for (jvar = 0 ; jvar < Lats ; ++jvar)
+         {
+            Record_float[jvar] = vp[jvar];
+         }
+      }
+      vector<size_t> startp,countp;
+      countp.push_back(1);
+      countp.push_back(1);
+      countp.push_back(Lats);
+      countp.push_back(1);
+      startp.push_back(OutputCount);
+      startp.push_back(jlev);
+      startp.push_back(0);
+      startp.push_back(0);
    //    All[code].NetVar->set_cur(OutputCount,jlev);
-   //    All[code].NetVar->put(Record_float,1,1,Lats,1);
-   // }
+      All[code].NetVar->putVar(startp,countp,Record_float);
+   }
 }
 
 
