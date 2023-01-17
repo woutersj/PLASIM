@@ -31,11 +31,19 @@ exit
 
 # These are the platforms we will build for by default, unless further
 # platforms are passed in on the command line
+# Set equal to the supported platforms in HDF5
 platforms = [
-    Platform("x86_64", "linux"; libc = "glibc"),
-    Platform("aarch64", "linux"; libc = "glibc")
+    Platform("x86_64", "linux"),
+    # HDF5_jll on armv7l should use the same glibc as the root filesystem
+    # before it can be used
+    # https://github.com/JuliaPackaging/Yggdrasil/pull/1090#discussion_r432683488
+    # Platform("armv7l", "linux"; libc="glibc"),
+    Platform("aarch64", "linux"; libc="glibc"),
+    Platform("x86_64", "macos"),
+    Platform("aarch64","macos"),
+    Platform("x86_64", "windows"),
+    Platform("i686", "windows"),
 ]
-
 
 # The products that we will ensure are always built
 products = [
