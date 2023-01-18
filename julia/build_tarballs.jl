@@ -26,6 +26,7 @@ cmake -DCMAKE_INSTALL_PREFIX=$prefix -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TARGET_TOOLC
 make -j${nproc}
 make install
 cd ..
+install_license LICENSE.TXT
 exit
 """
 
@@ -44,6 +45,7 @@ platforms = [
     Platform("x86_64", "windows"),
     Platform("i686", "windows"),
 ]
+platforms = expand_gfortran_versions(platforms)
 
 # The products that we will ensure are always built
 products = [
@@ -62,6 +64,7 @@ products = [
 dependencies = [
     Dependency(PackageSpec(name="OpenMPI_jll", uuid="fe0851c0-eecd-5654-98d4-656369965a5c"))
     Dependency(PackageSpec(name="NetCDF_jll", uuid="7243133f-43d8-5620-bbf4-c2c921802cf3"))
+    Dependency(PackageSpec(name="CompilerSupportLibraries_jll", uuid="e66e0078-7015-5450-92f7-15fbd957f2ae"))
 ]
 
 # Build the tarballs, and possibly a `build.jl` as well.
