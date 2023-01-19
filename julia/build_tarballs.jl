@@ -8,17 +8,17 @@ version = v"0.1.0"
 # Collection of sources required to complete build
 sources = [
     GitSource("https://github.com/woutersj/PLASIM.git", "d28d3b09d12bd14ea24fdfa027e70ffa5c0ef858"),
-    ArchiveSource("https://github.com/Unidata/netcdf-cxx4/archive/refs/tags/v4.3.1.tar.gz", "e3fe3d2ec06c1c2772555bf1208d220aab5fee186d04bd265219b0bc7a978edc")
+#    ArchiveSource("https://github.com/Unidata/netcdf-cxx4/archive/refs/tags/v4.3.1.tar.gz", "e3fe3d2ec06c1c2772555bf1208d220aab5fee186d04bd265219b0bc7a978edc")
 ]
 
 # Bash recipe for building across all platforms
 script = raw"""
 cd $WORKSPACE/srcdir
-cd netcdf-cxx4-4.3.1/
-./configure --prefix=${prefix} --build=${MACHTYPE} --host=${target}
-make -j${nproc}
-make install
-cd ..
+#cd netcdf-cxx4-4.3.1/
+#./configure --prefix=${prefix} --build=${MACHTYPE} --host=${target}
+#make -j${nproc}
+#make install
+#cd ..
 cd PLASIM/
 mkdir build
 cd build/
@@ -64,6 +64,8 @@ products = [
 dependencies = [
     Dependency(PackageSpec(name="OpenMPI_jll", uuid="fe0851c0-eecd-5654-98d4-656369965a5c"))
     Dependency(PackageSpec(name="NetCDF_jll", uuid="7243133f-43d8-5620-bbf4-c2c921802cf3"))
+    Dependency(PackageSpec(;name="NetCDFCXX_jll", uuid="4504df56-95e4-5f68-9397-6f265f6c54a6",
+                           url="https://github.com/woutersj/NetCDFCXX_jll.jl.git"))
     Dependency(PackageSpec(name="CompilerSupportLibraries_jll", uuid="e66e0078-7015-5450-92f7-15fbd957f2ae"))
 ]
 
