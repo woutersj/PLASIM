@@ -7,43 +7,33 @@ version = v"0.1.0"
 
 # Collection of sources required to complete build
 sources = [
-    GitSource("https://github.com/woutersj/PLASIM.git", "d28d3b09d12bd14ea24fdfa027e70ffa5c0ef858"),
-#    ArchiveSource("https://github.com/Unidata/netcdf-cxx4/archive/refs/tags/v4.3.1.tar.gz", "e3fe3d2ec06c1c2772555bf1208d220aab5fee186d04bd265219b0bc7a978edc")
+    GitSource("https://github.com/woutersj/PLASIM.git", "d28d3b09d12bd14ea24fdfa027e70ffa5c0ef858")
 ]
 
 # Bash recipe for building across all platforms
 script = raw"""
-cd $WORKSPACE/srcdir
-#cd netcdf-cxx4-4.3.1/
-#./configure --prefix=${prefix} --build=${MACHTYPE} --host=${target}
-#make -j${nproc}
-#make install
-#cd ..
-cd PLASIM/
+cd $WORKSPACE/srcdir/PLASIM/
 mkdir build
 cd build/
 cmake -DCMAKE_INSTALL_PREFIX=$prefix -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TARGET_TOOLCHAIN} -DCMAKE_BUILD_TYPE=Release ..
 make -j${nproc}
 make install
-cd ..
-install_license LICENSE.TXT
-exit
 """
 
 # These are the platforms we will build for by default, unless further
 # platforms are passed in on the command line
 # Set equal to the supported platforms in HDF5
 platforms = [
-    Platform("x86_64", "linux"),
+    Platform("x86_64", "linux"; libc = "glibc"),
     # HDF5_jll on armv7l should use the same glibc as the root filesystem
     # before it can be used
     # https://github.com/JuliaPackaging/Yggdrasil/pull/1090#discussion_r432683488
     # Platform("armv7l", "linux"; libc="glibc"),
-    Platform("aarch64", "linux"; libc="glibc"),
-    Platform("x86_64", "macos"),
-    Platform("aarch64","macos"),
-    Platform("x86_64", "windows"),
-    Platform("i686", "windows"),
+    #Platform("aarch64", "linux"; libc="glibc"),
+    #Platform("x86_64", "macos"),
+    #Platform("aarch64","macos"),
+    #Platform("x86_64", "windows"),
+    #Platform("i686", "windows"),
 ]
 platforms = expand_gfortran_versions(platforms)
 
@@ -70,4 +60,4 @@ dependencies = [
 ]
 
 # Build the tarballs, and possibly a `build.jl` as well.
-build_tarballs(ARGS, name, version, sources, script, platforms, products, dependencies; julia_compat="1.6", preferred_gcc_version = v"5.2.0")
+build_tarballs(ARGS, name, version, sources, script, platforms, products, dependencies; julia_compat="1.6", preferred_gcc_version = v"5")
