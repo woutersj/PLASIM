@@ -7,7 +7,7 @@ version = v"0.1.0"
 
 # Collection of sources required to complete build
 sources = [
-    GitSource("https://github.com/woutersj/PLASIM.git", "d28d3b09d12bd14ea24fdfa027e70ffa5c0ef858")
+    GitSource("https://github.com/woutersj/PLASIM.git", "fd826c66d9be3a384303b1dbecc822317ea72411")
 ]
 
 # Bash recipe for building across all platforms
@@ -46,16 +46,15 @@ products = [
     ExecutableProduct("plasim_t21_l10_p1", :plasim_t21_l10_p1),
     ExecutableProduct("plasim_t42_l20_p4", :plasim_t42_l20_p4),
     ExecutableProduct("plasim_t42_l20_p1", :plasim_t42_l20_p1),
-    ExecutableProduct("plasim_t21_l10_p4", :plasim_t21_l10_p4),
-    ExecutableProduct("burn8", :burn8)
+    ExecutableProduct("plasim_t21_l10_p4", :plasim_t21_l10_p4)
 ]
 
 # Dependencies that must be installed before this package can be built
 dependencies = [
     Dependency(PackageSpec(name="OpenMPI_jll", uuid="fe0851c0-eecd-5654-98d4-656369965a5c"))
-    Dependency(PackageSpec(name="NetCDF_jll", uuid="7243133f-43d8-5620-bbf4-c2c921802cf3"))
-    Dependency(PackageSpec(;name="NetCDFCXX_jll", uuid="4504df56-95e4-5f68-9397-6f265f6c54a6",
-                           url="https://github.com/woutersj/NetCDFCXX_jll.jl.git"))
+    #Dependency(PackageSpec(name="NetCDF_jll", uuid="7243133f-43d8-5620-bbf4-c2c921802cf3"))
+    #Dependency(PackageSpec(;name="NetCDFCXX_jll", uuid="4504df56-95e4-5f68-9397-6f265f6c54a6",
+    #                       url="https://github.com/woutersj/NetCDFCXX_jll.jl.git"))
     Dependency(PackageSpec(name="CompilerSupportLibraries_jll", uuid="e66e0078-7015-5450-92f7-15fbd957f2ae"))
 ]
 
