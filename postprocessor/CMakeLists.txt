@@ -2,11 +2,16 @@
 #set (NETCDF_FIND_COMPONENTS "CXX")
 #find_package (NetCDF REQUIRED)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(NETCDF_CXX REQUIRED netcdf-cxx4)
+option(WITH_BURNER "Build the postprocessor" OFF)
+message(STATUS "postprocessor compilation='${WITH_BURNER}'")
 
-add_executable(burn8 burn8.cpp)
+if(WITH_BURNER)
+	find_package(PkgConfig REQUIRED)
+	pkg_check_modules(NETCDF_CXX REQUIRED netcdf-cxx4)
 
-target_link_libraries (burn8 ${NETCDF_CXX_LIBRARIES})
+	add_executable(burn8 burn8.cpp)
 
-INSTALL(TARGETS burn8 DESTINATION bin)
+	target_link_libraries (burn8 ${NETCDF_CXX_LIBRARIES})
+
+	INSTALL(TARGETS burn8 DESTINATION bin)
+endif()
