@@ -7,7 +7,7 @@ version = v"0.1.0"
 
 # Collection of sources required to complete build
 sources = [
-    GitSource("https://github.com/woutersj/PLASIM.git", "fd826c66d9be3a384303b1dbecc822317ea72411")
+    GitSource("https://github.com/woutersj/PLASIM.git", "0b5278b68f6bcb3aa6073ad6453a48f63d89fbc6")
 ]
 
 # Bash recipe for building across all platforms
@@ -51,7 +51,8 @@ products = [
 
 # Dependencies that must be installed before this package can be built
 dependencies = [
-    Dependency(PackageSpec(name="OpenMPI_jll", uuid="fe0851c0-eecd-5654-98d4-656369965a5c"))
+    #Dependency(PackageSpec(name="OpenMPI_jll", uuid="fe0851c0-eecd-5654-98d4-656369965a5c"))
+    Dependency(PackageSpec(name="MPICH_jll", uuid="7cb0a576-ebde-5e09-9194-50597f1243b4"))
     #Dependency(PackageSpec(name="NetCDF_jll", uuid="7243133f-43d8-5620-bbf4-c2c921802cf3"))
     #Dependency(PackageSpec(;name="NetCDFCXX_jll", uuid="4504df56-95e4-5f68-9397-6f265f6c54a6",
     #                       url="https://github.com/woutersj/NetCDFCXX_jll.jl.git"))
@@ -59,4 +60,4 @@ dependencies = [
 ]
 
 # Build the tarballs, and possibly a `build.jl` as well.
-build_tarballs(ARGS, name, version, sources, script, platforms, products, dependencies; julia_compat="1.6", preferred_gcc_version = v"5")
+build_tarballs(ARGS, name, version, sources, script, platforms, products, dependencies; julia_compat="1.6")
