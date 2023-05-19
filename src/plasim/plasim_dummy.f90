@@ -187,7 +187,7 @@
 !
 !     get process id
 !
-      call mpi_info(nproc,mypid)
+      call mpgetinfo(nproc,mypid)
 !
 !     read and print namelist and distribute it
 !

@@ -148,7 +148,7 @@
 !
 !     get process id
 !
-      call mpi_info(nproc,mypid)
+      call mpgetinfo(nproc,mypid)
 !
 !     compute grids properties
 !

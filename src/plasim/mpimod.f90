@@ -565,7 +565,7 @@
 !     SUBROUTINE MPI_INFO
 !     ===================
 
-      subroutine mpi_info(nprocess,npid)    ! get nproc and pid
+      subroutine mpgetinfo(nprocess,npid)    ! get nproc and pid
       use mpimod
 
       myworld=MPI_COMM_WORLD
@@ -574,7 +574,7 @@
       call mpi_comm_rank(myworld,npid,mpinfo)
 
       return
-      end subroutine mpi_info
+      end subroutine mpgetinfo
 
 
 !     ==================
