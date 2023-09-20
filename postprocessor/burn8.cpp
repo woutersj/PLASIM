@@ -5620,7 +5620,7 @@ void InitAll(void)
    All[278].Init("flpr" ,"full_level_pressure"             ,"Pa"       ,0); // Not standard
 }
 
-void Usage(void)
+void Usage(int status)
 {
    char  Line[132];
    fpi = fopen("/usr/local/doc/burn7.txt","r");
@@ -5648,7 +5648,7 @@ void Usage(void)
 #endif
    printf("  namelist is read from  <stdin>\n");
    printf("  printout is written to <stdout>\n\n");
-   exit(1);
+   exit(status);
 }
 
 void parini(void)
@@ -6188,19 +6188,20 @@ int main(int argc, char *argv[])
          else if (argv[i][1] == 'i') GaussGrid  =  1;
          else if (argv[i][1] == 'r') GaussGrid  =  0;
          else if (argv[i][1] == 's') SaveMemory =  1;
-         else Usage();
+         else if (argv[i][1] == 'h') Usage(EXIT_SUCCESS);
+         else Usage(EXIT_FAILURE);
       }
       else if (ifile[0] == '\0') strcpy(ifile,argv[i]);
       else if (ofile[0] == '\0') strcpy(ofile,argv[i]);
       else if (strcmp("Debug",argv[i]) == 0) Debug = 1;
-      else Usage();
+      else Usage(EXIT_FAILURE);
    }
 
    if (NetCDF) Grads = 0;
 
    if (ifile[0] == '\0' || ofile[0] == '\0') {
       printf("*** Missing filename ***\n");
-      Usage();
+      Usage(EXIT_FAILURE);
    }
 
    /*******************/
