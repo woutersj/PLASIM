@@ -2,7 +2,7 @@
 
 #define NETCDF_OUTPUT
 
-#define V0 "burn 7.7 (02-Feb-2017)"
+#define V0 "burn 8.0 (02-Feb-2017)"
 #define V1 "KlimaCampus"
 #define V2 "Usage: burn7 [-help|-c|-d|-m|-n|-r|-s] <modelfile> <resultfile>"
 #define V3 "New: option <-g> writes Grads ctl for service plotting"
@@ -844,7 +844,7 @@ GauLat *Gaulat;
 
 #ifdef NETCDF_OUTPUT
 #define TITLE        "PUMA/PLASIM DATA"
-#define HISTORY      "Created by PumaBurner 7.4"
+#define HISTORY      "Created by PumaBurner 8.0"
 
 
 void NetOpen(char *NetFileName)
@@ -5623,7 +5623,7 @@ void InitAll(void)
 void Usage(int status)
 {
    char  Line[132];
-   fpi = fopen("/usr/local/doc/burn7.txt","r");
+   fpi = fopen("/usr/local/doc/burn8.txt","r");
    if (fpi)
    do
    {
