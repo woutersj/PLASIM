@@ -35,8 +35,8 @@ message(STATUS "number of processors='${npros}'")
 # MPI
 #
 
-find_package(MPI REQUIRED)
-include_directories(${MPI_Fortran_INCLUDE_PATH})
+find_package(MPI REQUIRED COMPONENTS Fortran)
+include_directories(${MPI_Fortran_INCLUDE_DIRS})
 
 #
 # build flags
