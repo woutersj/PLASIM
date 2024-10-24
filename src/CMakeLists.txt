@@ -15,6 +15,7 @@ message(STATUS "LSG ocean='${WITH_LSG}'")
 
 option(WITH_MPI "use MPI" ON)
 message(STATUS "use MPI='${WITH_MPI}'")
+
 set(planet "earth" CACHE STRING "Planet configuration")
 set_property(CACHE planet PROPERTY STRINGS earth mars exo)
 message(STATUS "Planet='${planet}'")
