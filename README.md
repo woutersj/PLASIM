@@ -20,4 +20,20 @@ make install
 ```
 
 The installation directory can be specified by adding the argument `-DCMAKE_INSTALL_PREFIX=...` to `cmake`.
-Further options can be enabled/disabled with `WITH_GUI` (to display a diagnostic GUI while running), `WITH_LSG`, `WITH_COUPLER` (compile and couple the LSG ocean modeal), `WITH_MPI` (enable MPI for multiprocessor runs). The variables `nlats`, `nlevs`, and `npros` configure the number of latitudes, levels and processors to compile for. These variables can be lists of multiple variables, in which case a binary for each possible combination will be compiled.
+
+Further options can be enabled/disabled:
+- `WITH_GUI` (to display a diagnostic GUI while running, default `OFF`),
+- `WITH_LSG`, `WITH_COUPLER` (compile and couple the LSG ocean model, default `OFF`),
+- `WITH_MPI` (enable MPI for multiprocessor runs, default `ON`).
+
+Further settings can be set using these variables:
+- `nlats` (number of latitudes, default `32 64`)
+- `nlevs` (number of vertical levels, default `10 20`)
+- `npros` (number of processors, default `1 4`).
+These variables can be lists of multiple variables, in which case a binary for each possible combination will be compiled. `npros` is set to `1` if MPI is not enabled.
+
+For example, instead of `cmake ..` in the above, one can do
+```
+cmake -Dnlats=32 -Dnlevs=10 -DWITH_MPI=OFF ..
+```
+to compile a single binary.
