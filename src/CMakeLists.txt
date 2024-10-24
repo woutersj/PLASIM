@@ -33,7 +33,7 @@ message(STATUS "number of levels='${nlevs}'")
 if(WITH_MPI)
 	set(npros 1 4 CACHE STRING "number of processors")
 else()
-	message(STATUS "MPI disabled: ignoring number of CPU")
+	message(STATUS "MPI disabled: using 1 processor")
 	set(npros 1  CACHE STRING "number of processors")
 endif()
 
