@@ -29,8 +29,9 @@ Further options can be enabled/disabled:
 Further settings can be set using these variables:
 - `nlats` (number of latitudes, default `32 64`)
 - `nlevs` (number of vertical levels, default `10 20`)
-- `npros` (number of processors, default `1 4`).
-These variables can be lists of multiple variables, in which case a binary for each possible combination will be compiled. `npros` is set to `1` if MPI is not enabled.
+- `npros` (number of processors, default `1 4`, `1` if MPI is not enabled.).
+
+These variables can be lists of multiple values, in which case a binary for each possible combination will be compiled.
 
 For example, instead of `cmake ..` in the above, one can do
 ```
