@@ -13,6 +13,8 @@ message(STATUS "coupler compilation='${WITH_COUPLER}'")
 option(WITH_LSG "LSG Ocean" OFF)
 message(STATUS "LSG ocean='${WITH_LSG}'")
 
+option(WITH_MPI "use MPI" ON)
+message(STATUS "use MPI='${WITH_MPI}'")
 set(planet "earth" CACHE STRING "Planet configuration")
 set_property(CACHE planet PROPERTY STRINGS earth mars exo)
 message(STATUS "Planet='${planet}'")
@@ -28,16 +30,23 @@ set(nlevs 10 20 CACHE STRING "number of atmospheric levels")
 message(STATUS "number of levels='${nlevs}'")
 
 # 4 8
-set(npros 1 4 CACHE STRING "number of processors")
+if(WITH_MPI)
+	set(npros 1 4 CACHE STRING "number of processors")
+else()
+	message(STATUS "MPI disabled: ignoring number of CPU")
+	set(npros 1  CACHE STRING "number of processors")
+endif()
+
 message(STATUS "number of processors='${npros}'")
 
 #
 # MPI
 #
 
-find_package(MPI REQUIRED COMPONENTS Fortran)
-include_directories(${MPI_Fortran_INCLUDE_DIRS})
-
+if(WITH_MPI)
+  find_package(MPI REQUIRED COMPONENTS Fortran)
+  include_directories(${MPI_Fortran_INCLUDE_DIRS})
+endif()
 #
 # build flags
 #
@@ -50,12 +59,18 @@ set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g")
 # Select source files
 #
 
-set(PLASIM_F_SRCS plasimmod.f90 icemod.f90 oceanmod.f90 resmod_stub.f90 mpimod.f90
+set(PLASIM_F_SRCS plasimmod.f90 icemod.f90 oceanmod.f90 resmod_stub.f90
                     tracermod.f90 surfmod.f90 rainmod.f90 outmod.f90
                     radmod.f90 legmod.f90 landmod.f90
                     calmod.f90  fftmod.f90 p_${planet}.f90
                     fluxmod.f90 miscmod.f90 restartmod.f90 tpcore.f90 gaussmod.f90 
                     seamod.f90 simba.f90 trc_routines.f90)
+
+if(WITH_MPI)
+  list(APPEND PLASIM_F_SRCS mpimod.f90)
+else()
+  list(APPEND PLASIM_F_SRCS mpimod_stub.f90)
+endif()
 
 if(WITH_COUPLER)
     list(APPEND PLASIM_F_SRCS cpl.f90)
