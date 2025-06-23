@@ -7,7 +7,8 @@
 \usepackage{calc}
 \usepackage{exscale}
 \usepackage{textcomp}
-\usepackage{scrpage2}
+% obsolete package
+%%\usepackage{scrlayer-scrpage}
 %---zur Erstellung von Tabellen, erweiterte Version von tabular*
 \usepackage{tabularx}
 %---fuer Graphiken
@@ -58,8 +59,8 @@
 % standard : 2. optionaler Parameter 
 \newcommand{\equref}[1]{(\ref{#1})}
 %Seitenlayout, headings: 
-\pagestyle{scrheadings}
-\manualmark
+%\pagestyle{scrheadings}
+%\manualmark
 %\automark[section]{chapter}
 %\setheadsepline{0.4pt}[\color{black}]
 \addtokomafont{caption}{\small}
@@ -195,7 +196,7 @@ The global water budget (Fig. \ref{img:enercycle} b) describes continental and o
 The Lorenz energy cycle presents the global energy balance, which includes reservoirs relevant for atmospheric dynamics, energy  fluxes into and conversions between them. The Lorenz cycle is commonly displayed as a box scheme (Fig. \ref{img:lez}), describing the reservoirs of available potential (ZPE) and  kinetic energy (ZKE) of the zonal mean flow, available potential energy of the transient (TPE) and stationary (SPE) eddies and kinetic energy of transient (TKE) and stationary eddies (SKE). Sources, sinks and conversions are symbolised by arrows. The energy of eddies and their conversion terms can be partitioned in three categories: The long waves (LW) include all wavenumbers smaller than four, synoptic waves (SW) represent four to nine, and small wavenumbers (KW) from 10 to 21. The reservoir of available potential energy of the zonal mean flow is largest. It is transformed to eddy available potential (by transient and stationary eddies), and to zonal mean kinetic energy, which is small with Ferrel and Hadley cell %contributions almost cancelling \citep[p. 383]{Peixoto1993} and \citep[p. 341]{Holton1992}.
 contributions almost cancelling (\citet[p. 383]{Peixoto1993} and \citet[p. 341]{Holton1992}).
 
-\begin{figure}[c]
+\begin{figure}[b]
 \begin{tabular}{cc}
 \begin{minipage}{1.0\textwidth}\hspace{1.15cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.15cm}
 \begin{center}
@@ -216,11 +217,11 @@ contributions almost cancelling (\citet[p. 383]{Peixoto1993} and \citet[p. 341]{
 \end{figure}
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \begin{tabular}{cc}
 \begin{minipage}{1.0\textwidth}
 \begin{center}
-\includegraphics[height=19.0cm]{eps/LEZANM.epsi}
+\includegraphics[height=19.0cm]{eps/LEZANM.eps}
 \end{center}
 \end{minipage}
 \end{tabular}
@@ -907,7 +908,7 @@ Additional information is obtained from the unfiltered and filtered 1000 hPa geo
 The wavenumber-frequency spectra of the 500 hPa geopotential height along 50° N provide information about scale dependent contribution of transient eddy variance and the respective eddy phase speed \citep{Fraedrich1978,Dell'Aquila2005}. The propagating wave spectrum (Fig. \ref{img:frepow} b) shows the following peaks (see Lorenz energy cycle on page \pageref{img:lez}): (i) the low frequency-wavenumber range shows eastward and westward propagating waves; (ii) the high frequency-wavenumber domain corresponds to eastward propagating synoptic scale disturbances. While these general features are shown by PlaSim, \citet{Fraedrich1978} point out, that three spectral peaks should be obvious: the eastward propagating long waves at wavenumber 5-6 and a period of 8-10 days, the eastward propagating short waves at wavenumber 7-8 and a period of 4-6 days and the stationary ultralong waves at wavenumber 1-4 and a period of 20-30 days. In fact, the peaks of the eastward propagating long waves and the stationary ultralong waves are much more pronounced in the PlaSim simulation than the peak of the short waves. Moreover, the strength of all peaks is slightly underestimated by PlaSim, compared to ERA (Fig. \ref{img:frepow} d) and \citet{Fraedrich1978}.
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{3.1cm}PlaSim \vspace{-0.1cm}\hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{0.02cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.3cm} \\
 \includegraphics[height=7.5cm,angle=-90]
@@ -931,7 +932,7 @@ The wavenumber-frequency spectra of the 500 hPa geopotential height along 50° N
 
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{3.1cm}PlaSim \vspace{-0.1cm} \hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{0.02cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.3cm} \\
 \includegraphics[height=7.5cm,angle=-90]
@@ -955,7 +956,7 @@ The wavenumber-frequency spectra of the 500 hPa geopotential height along 50° N
 
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{3.8cm}PlaSim \vspace{0.1cm} \hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{0.50cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=8.5cm,width=6.5cm,angle=-90]
@@ -1024,7 +1025,7 @@ Meridional-height cross-sections of the Eulerian mean circulation are presented 
 
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{4.0cm}PlaSim \vspace{0.2cm} \hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{1cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=8.5cm,width=6.5cm,angle=-90]
@@ -1047,7 +1048,7 @@ Meridional-height cross-sections of the Eulerian mean circulation are presented 
 \end{figure}
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{4.0cm}PlaSim \vspace{0.2cm} \hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{1.05cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=8.5cm,width=6.5cm,angle=-90]
@@ -1070,7 +1071,7 @@ Meridional-height cross-sections of the Eulerian mean circulation are presented 
 \end{figure}
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{4.0cm}PlaSim \vspace{0.2cm} \hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{0.90cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=8.5cm,width=6.5cm,angle=-90]
@@ -1094,7 +1095,7 @@ Meridional-height cross-sections of the Eulerian mean circulation are presented 
 
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{3.8cm}PlaSim \vspace{0.2cm} \hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{0.95cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=8.0cm,angle=-90]
@@ -1117,7 +1118,7 @@ Meridional-height cross-sections of the Eulerian mean circulation are presented 
 \end{figure}
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{4.1cm}PlaSim \vspace{0.2cm} \hspace{7.5cm} ERA \\
 \parbox{8.5cm}{\hspace{1.05cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=8.5cm,width=6.5cm,angle=-90]
@@ -1142,7 +1143,7 @@ Meridional-height cross-sections of the Eulerian mean circulation are presented 
 
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{3.5cm}PlaSim \vspace{0.2cm} \hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{0.90cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=7.5cm,angle=-90]
@@ -1173,7 +1174,7 @@ Meridional-height cross-sections of the Eulerian mean circulation are presented 
 \end{figure}
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{3.5cm}PlaSim \vspace{0.2cm} \hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{0.90cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=7.5cm,angle=-90]
@@ -1219,7 +1220,7 @@ The annual mean tropical Cyclone Genesis Parameter (YGP, Fig. \ref{img:sgp} a, b
 
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{3.8cm}PlaSim \vspace{0.2cm} \hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{0.95cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=8.0cm,angle=-90]
@@ -1243,7 +1244,7 @@ The annual mean tropical Cyclone Genesis Parameter (YGP, Fig. \ref{img:sgp} a, b
 
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{3.8cm}PlaSim \vspace{0.2cm} \hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{0.95cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=8.0cm,angle=-90]
@@ -1267,7 +1268,7 @@ The annual mean tropical Cyclone Genesis Parameter (YGP, Fig. \ref{img:sgp} a, b
 
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \begin{tabular}{cc}
 \hspace{-0.5cm}PlaSim
 \\
@@ -1314,7 +1315,7 @@ The Bowen ratio \citep{Bowen1926a} of surface sensible over latent heat flux (Fi
 
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \begin{tabular}{cc}
 \hspace{-0.5cm}PlaSim \vspace{-0.2cm}
 \\
@@ -1338,7 +1339,7 @@ The Bowen ratio \citep{Bowen1926a} of surface sensible over latent heat flux (Fi
 
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \begin{tabular}{cc}
 \hspace{-0.5cm}PlaSim 
 \\
@@ -1360,7 +1361,7 @@ The Bowen ratio \citep{Bowen1926a} of surface sensible over latent heat flux (Fi
 \end{figure}
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \begin{tabular}{cc}
 \hspace{-0.5cm}PlaSim
 \\
@@ -1445,7 +1446,7 @@ In this chapter a detailed overview about the output and the namelists of the Pl
 
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{4.0cm}PlaSim \vspace{0.2cm} \hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{0.90cm}\begin{scriptsize}(a) \end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=8.5cm,width=6.5cm,angle=-90]
@@ -1476,7 +1477,7 @@ In this chapter a detailed overview about the output and the namelists of the Pl
 \end{figure}
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{4.0cm}PlaSim \vspace{0.2cm} \hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{0.90cm}\begin{scriptsize}(a) \end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=8.5cm,width=6.5cm,angle=-90]
@@ -1508,7 +1509,7 @@ In this chapter a detailed overview about the output and the namelists of the Pl
 
 \newpage
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{3.1cm}PlaSim \vspace{0.2cm} \hspace{7.1cm} ERA \\
 \parbox{8.5cm}{\hspace{0.50cm}\begin{scriptsize} (a)\end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=8.5cm,width=6.5cm,angle=-90]
@@ -1539,7 +1540,7 @@ In this chapter a detailed overview about the output and the namelists of the Pl
 \end{figure}
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{3.55cm}PlaSim \vspace{0.2cm} \hspace{7.25cm} ERA \\
 \parbox{8.5cm}{\hspace{0.90cm}\begin{scriptsize}(a) \end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=7.5cm,angle=-90]
@@ -1571,7 +1572,7 @@ In this chapter a detailed overview about the output and the namelists of the Pl
 
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{3.55cm}PlaSim \vspace{0.2cm} \hspace{7.25cm} ERA \\
 \parbox{8.5cm}{\hspace{0.90cm}\begin{scriptsize}(a) \end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=7.5cm,angle=-90]
@@ -1603,7 +1604,7 @@ In this chapter a detailed overview about the output and the namelists of the Pl
 
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{3.5cm}PlaSim \vspace{0.2cm} \hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{0.90cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=7.5cm,angle=-90]
@@ -1635,7 +1636,7 @@ In this chapter a detailed overview about the output and the namelists of the Pl
 
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{3.8cm}PlaSim \vspace{0.2cm} \hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{0.95cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=8.0cm,angle=-90]
@@ -1658,7 +1659,7 @@ In this chapter a detailed overview about the output and the namelists of the Pl
 \end{figure}
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{3.8cm}PlaSim \vspace{0.2cm} \hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{0.95cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=8.0cm,angle=-90]
@@ -1681,7 +1682,7 @@ In this chapter a detailed overview about the output and the namelists of the Pl
 \end{figure}
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{3.8cm}PlaSim \vspace{0.2cm} \hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{0.95cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=8.0cm,angle=-90]
@@ -1704,7 +1705,7 @@ In this chapter a detailed overview about the output and the namelists of the Pl
 \end{figure}
 
 
-\begin{figure}[c]
+\begin{figure}[b]
 \hspace{3.8cm}PlaSim \vspace{0.2cm} \hspace{7.3cm} ERA \\
 \parbox{8.5cm}{\hspace{0.95cm}\begin{scriptsize}(a)\end{scriptsize} \vspace{-0.5cm} \\
 \includegraphics[height=8.0cm,angle=-90]
