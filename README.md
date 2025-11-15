@@ -38,3 +38,7 @@ For example, instead of `cmake ..` in the above, one can do
 cmake -Dnlats=32 -Dnlevs=10 -DWITH_MPI=OFF ..
 ```
 to compile a single binary.
+
+## Dependencies
+
+On Fedora, install `openmpi-devel` for MPI and load it with `module load mpi`. For the postprocessor install `netcdf-cxx4-devel`
