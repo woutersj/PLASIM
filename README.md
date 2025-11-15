@@ -42,3 +42,5 @@ to compile a single binary.
 ## Dependencies
 
 On Fedora, install `openmpi-devel` for MPI and load it with `module load mpi`. For the postprocessor install `netcdf-cxx4-devel`
+
+On Debian, install `openmpi-bin` and `libopenmpi-dev` for MPI. For the postprocessor install `libnetcdf-c++4-devel`.
