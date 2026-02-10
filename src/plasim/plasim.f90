@@ -44,6 +44,7 @@
 plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 
       call mpstart(-1)       ! -1: Start MPI   >=0 arg = MPI_COMM_WORLD
+      call parse_command_line_args
       call setfilenames
       call opendiag
       if (mrnum == 2) then
@@ -61,16 +62,16 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
       ! ***************************
       ! * SUBROUTINE SETFILENAMES *
       ! ***************************
-      
+
       subroutine setfilenames
       use pumamod
-      
+
       character (3) :: mrext
-      
+
       if (mrpid <  0) return ! no multirun
-      
+
       write(mrext,'("_",i2.2)') mrpid
-      
+
       plasim_namelist     = trim(plasim_namelist    ) // mrext
       radmod_namelist     = trim(radmod_namelist    ) // mrext
       miscmod_namelist    = trim(miscmod_namelist   ) // mrext
@@ -90,7 +91,46 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
       landmod_namelist    = trim(landmod_namelist   ) // mrext
       vegmod_namelist     = trim(vegmod_namelist    ) // mrext
       seamod_namelist     = trim(seamod_namelist    ) // mrext
-      
+
+      return
+      end
+
+!     *********************************
+!     * SUBROUTINE PARSE_COMMAND_LINE_ARGS *
+!     *********************************
+
+      subroutine parse_command_line_args
+      use pumamod
+
+      implicit none
+      integer :: i, num_args
+      character(256) :: arg
+
+      ! Get number of command line arguments
+      num_args = command_argument_count()
+
+      ! Loop through arguments
+      i = 1
+      do while (i <= num_args)
+         call get_command_argument(i, arg)
+
+         ! Check for plasim_output option
+         if (arg == '-plasim_output' .or. arg == '--plasim_output') then
+            ! Get the next argument as the value
+            if (i + 1 <= num_args) then
+               call get_command_argument(i + 1, plasim_output)
+               i = i + 2 ! Skip the value argument
+            else
+               if (mypid == NROOT) then
+                  write(nud,*) 'Error: Missing value for -plasim_output option'
+               endif
+               i = i + 1
+            endif
+         else
+            i = i + 1
+         endif
+      end do
+
       return
       end
 
@@ -100,11 +140,11 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 
       subroutine opendiag
       use pumamod
-      
+
       if (mypid == NROOT) then
          open(nud,file=plasim_diag)
       endif
-      
+
       return
       end
 
@@ -115,14 +155,14 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 
       subroutine allocate_arrays
       use pumamod
-      
+
       if (mrnum == 2) then
          allocate(sdd(nesp,nlev))   ; sdd(:,:)  = 0.0
          allocate(std(nesp,nlev))   ; std(:,:)  = 0.0
          allocate(szd(nesp,nlev))   ; szd(:,:)  = 0.0
          allocate(spd(nesp     ))   ; spd(:  )  = 0.0
       endif
-      
+
       return
       end subroutine allocate_arrays
 
@@ -185,7 +225,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
          call initpm                ! Several initializations
          call initsi                ! Initialize semi implicit scheme
          call guistart              ! Initialize GUI
-         if (nsela > 0) call tracer_ini0 ! initialize tracer data 
+         if (nsela > 0) call tracer_ini0 ! initialize tracer data
       endif ! (mypid == NROOT)
 
 !     ***********************
@@ -524,7 +564,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 
 !     Use either month countdown (n_run_years * 12 + n_run_months)
 !     or step-countdown (for debugging purposes)
-      
+
       mocd = n_run_months                     ! month countdown
       nscd = n_run_days * ntspd + n_run_steps ! step countdown
 
@@ -535,7 +575,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 
       do while (mocd > 0 .or. nscd > 0)  ! main loop
 
- 
+
 !        ************************************************************
 !        * calculation of non-linear quantities in grid point space *
 !        ************************************************************
@@ -587,7 +627,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
          if (imon /= ndatim(2)) then
             mocd = mocd - 1 ! next month
             if (mypid == NROOT) then
-               write(nud,"('Completed month ',I2.2,'-',I4.4)") imon,iyea  
+               write(nud,"('Completed month ',I2.2,'-',I4.4)") imon,iyea
             endif
             mstep = 0
          endif
@@ -619,7 +659,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
       if(ndiaggp3d > 0) deallocate(dgp3d)
       if(ndiagsp3d > 0) deallocate(dsp3d)
       if(ndiagcf   > 0) deallocate(dclforc)
-      if(nentropy  > 0) then 
+      if(nentropy  > 0) then
        deallocate(dentropy,dentrop,dentrot,dentroq,dentro)
       endif
       if(nenergy   > 0) deallocate(denergy)
@@ -713,7 +753,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
       call mpputgp('ats0'  ,ats0  ,NHOR,1)
       call mpputgp('atsama',atsama,NHOR,1)
       call mpputgp('atsami',atsami,NHOR,1)
-      
+
 
 !
 !*    finish graphical user interface
@@ -758,12 +798,12 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 !
 !     time consumption
 !
-      if (mypid == NROOT) then 
+      if (mypid == NROOT) then
 !        Get resource stats from function resources in file pumax.c
          ires = nresources(zut,zst,imem,ipr,ipf,isw,idr,idw)
          call cpu_time(tmstop)
          tmrun = tmstop - tmstart
-         if (nstep > nstep1) then 
+         if (nstep > nstep1) then
             zspy = tmrun * n_days_per_year * real(ntspd) / (nstep-nstep1)
             zypd = (24.0 * 3600.0 / zspy)                         ! siy / day
             write(nud,'(/,"****************************************")')
@@ -793,13 +833,13 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
                write(nud,'("* Seconds per sim year: ",i6,9x,"*")') nint(zspy)
             else if (zspy < 900000.0) then
                write(nud,'("* Minutes per sim year  ",i6,9x,"*")') nint(zspy/60.0)
-            else    
+            else
                write(nud,'("* Days per sim year:    ",i6,5x,"*")') nint(zspy/86400.0)
             endif
                write(nud,'("* Sim years per day   :",i7,9x,"*")') nint(zypd)
             write(nud,'("****************************************")')
-         endif   
-      endif      
+         endif
+      endif
       return
       end
 
@@ -916,17 +956,17 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
             write(44,*) 'gz(1,1) = ',gz(1,1)
             write(44,*) 'gt(1,1) = ',gt(1,1)
             close(44)
-   
+
             write(nud,*) 'Planet Simulator aborted'
             write(nud,*) 'gd(1,1) = ',gd(1,1)
             write(nud,*) 'gz(1,1) = ',gz(1,1)
             write(nud,*) 'gt(1,1) = ',gt(1,1)
-   
+
             stop
          endif
       endif
       end subroutine stability_check
-            
+
 
 !     =================
 !     SUBROUTINE INITFD
@@ -1154,10 +1194,10 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
          write(nud,*) 'assuming [days] - converting to [sec]'
          pf(:) = pf(:) * solar_day
          write(nud,*) 'new maxval(',trim(yn),') = ',maxval(pf(:))
-      endif   
+      endif
       return
-      end 
-         
+      end
+
 !     =================
 !     SUBROUTINE INITPM
 !     =================
@@ -1204,7 +1244,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 !     dimensionless coefficient for newtonian cooling
 !     friction and timestep. of course a day is 2*PI in non dimensional
 !     units using omega as the unit of frquency.
-!     
+!
 !     dayseccheck assumes units [days] if values < timestep
 !     and converts values to [sec] (compatibilty routine)
 
@@ -1220,7 +1260,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
       elsewhere
          damp = 0.0
       endwhere
-         
+
       where (tfrc > 0.0)
           tfrc = solar_day / (TWOPI * tfrc)
       elsewhere
@@ -1840,7 +1880,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 
       subroutine updatim(kstep)
       use pumamod
-       
+
       if (n_days_per_year == 365) then
          call step2cal(kstep,ntspd,ndatim)
       else
@@ -2135,13 +2175,13 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
          call gp2fc(gp,NLON,NLPP)
          call fc2sp(gp,span)
          call mpsum(span,1)
- 
+
          call mpgacs(csu)
          call mpgacs(csv)
          call mpgacs(cst)
          call mpgacs(csm)
          call mpgacs(ccc)
- 
+
          if (mypid == NROOT) then
             zcs(:,:) = csu(:,:)
             call guiput("CSU"  // char(0) ,zcs ,NLAT, NLEV,1)
@@ -2155,9 +2195,9 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 
          ! send fields to GUI for column visualization
          call guigvcol("GUCOL"  // char(0),gu,sellon) ! u
-         call guigvcol("GVCOL"  // char(0),gv,sellon) ! v 
-         call guigtcol(dt,sellon) ! t 
-         call guid3dcol("DCCCOL" // char(0),dcc,sellon,NLEP,100.0,0.0) !cl-cov 
+         call guigvcol("GVCOL"  // char(0),gv,sellon) ! v
+         call guigtcol(dt,sellon) ! t
+         call guid3dcol("DCCCOL" // char(0),dcc,sellon,NLEP,100.0,0.0) !cl-cov
          call guid3dcol("DQCOL" // char(0),dq,sellon,NLEP,1000.0,0.0)  !dq
          call guid3dcol("DTDTCOL" // char(0),dtdt,sellon,NLEP,         &
                         solar_day,0.0)            ! t-tendency
@@ -2596,7 +2636,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
        deallocate(zst)
        if (nqspec == 1) deallocate(zsq)
        deallocate(zsp)
-      endif       
+      endif
       if(nentropy > 0) then
        dentropy(:,2)=0.
        dentropy(:,35)=0.
@@ -2613,7 +2653,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
      &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)
         dentropy(:,35)=dentropy(:,35)+dentro(:)
         dentropy(:,36)=dentropy(:,36)                                   &
-     &                +((acpd*(1.+adv*zqgp(:,jlev))                     & 
+     &                +((acpd*(1.+adv*zqgp(:,jlev))                     &
      &                  *log(ztgp(:,jlev)+zttgp(:,jlev)*deltsec2)       &
      &                  -gascon*(1.+(1./rdbrv-1.)*zqgp(:,jlev))         &
      &                  *log(zpgp(:)))*zpgp(:)                          &
@@ -2621,7 +2661,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
      &                  *log(ztgp(:,jlev))                              &
      &                  -gascon*(1.+(1./rdbrv-1.)*zqmgp(:,jlev))        &
      &                  *log(zpmgp(:)))*zpmgp(:))                       &
-     &                /deltsec2/ga*dsigma(jlev) 
+     &                /deltsec2/ga*dsigma(jlev)
        enddo
       endif
       if(nenergy > 0) then
@@ -2639,8 +2679,8 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
        do jlev=1,NLEV
         zekin(:,jlev)=0.5*(zugp(:,jlev)*zugp(:,jlev)                    &
      &                    +zvgp(:,jlev)*zvgp(:,jlev))*cv*cv*rcsq(:)     &
-     &               *zpmgp(:)   
-        zepot(:,jlev)=ztgp(:,jlev)*acpd*(1.+adv*zqmgp(:,jlev))*zpmgp(:) 
+     &               *zpmgp(:)
+        zepot(:,jlev)=ztgp(:,jlev)*acpd*(1.+adv*zqmgp(:,jlev))*zpmgp(:)
        enddo
        call dv2uv(sd,sz,zugp,zvgp)
        call fc2gp(zugp,NLON,NLPP*NLEV)
@@ -2666,7 +2706,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
      &               +((ztgp(:,jlev)+zttgp(:,jlev)*deltsec2)            &
      &                 *acpd*(1.+adv*zqgp(:,jlev))*zpgp(:)              &
      &                -zepot(:,jlev))/deltsec2/ga*dsigma(jlev)
-        if(nener3d > 0) then 
+        if(nener3d > 0) then
          dener3d(:,jlev,27)=-zekin(:,jlev)/deltsec2/ga*dsigma(jlev)
          dener3d(:,jlev,1)=(ztgp(:,jlev)+zttgp(:,jlev)*deltsec2)        &
      &               *acpd*(1.+adv*zqgp(:,jlev))*zpgp(:)*dsigma(jlev)/ga
@@ -2675,7 +2715,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
          dener3d(:,jlev,26)=((ztgp(:,jlev)+zttgp(:,jlev)*deltsec2)      &
      &                     *acpd*(1.+adv*zqgp(:,jlev))*zpgp(:)          &
      &                     -zepot(:,jlev))/deltsec2/ga*dsigma(jlev)
-        endif  
+        endif
        enddo
        deallocate(zsd)
        deallocate(zsz)
@@ -2827,7 +2867,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 !
 
       call fluxstep
-     
+
 !
 !     dbug print out
 !
@@ -2844,7 +2884,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 !
 
       if(nrad > 0) call radstep
-     
+
 !
 !     dbug print out
 !
@@ -3200,13 +3240,13 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 !     prepare diagnostics of efficiency
 !
       if(ndheat > 1) then
-       allocate(zst(NESP,NLEV))      
-       if (nqspec == 1) allocate(zsq(NESP,NLEV))      
-       allocate(zstt(NESP,NLEV)) 
-       allocate(zstt2(NESP,NLEV)) 
-       allocate(ztgp(NHOR,NLEV)) 
-       allocate(zqgp(NHOR,NLEV)) 
-       allocate(zdtgp(NHOR,NLEV)) 
+       allocate(zst(NESP,NLEV))
+       if (nqspec == 1) allocate(zsq(NESP,NLEV))
+       allocate(zstt(NESP,NLEV))
+       allocate(zstt2(NESP,NLEV))
+       allocate(ztgp(NHOR,NLEV))
+       allocate(zqgp(NHOR,NLEV))
+       allocate(zdtgp(NHOR,NLEV))
        allocate(zsum1(4))
        allocate(zgw(NHOR))
        call mpgallsp(zst,stp,NLEV)
@@ -3262,7 +3302,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
         dentro(:)=zttgp(:,jlev)/dentrot(:,jlev)                         &
      &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)
         dentropy(:,3)=dentropy(:,3)+dentro(:)
-        if(nentro3d > 0) dentro3d(:,jlev,3)=dentro(:) 
+        if(nentro3d > 0) dentro3d(:,jlev,3)=dentro(:)
        enddo
        deallocate(zttgp)
       endif
@@ -3282,7 +3322,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
         if(nener3d > 0) then
          dener3d(:,jlev,3)=zttgp(:,jlev)                                &
      &                   *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
-        endif 
+        endif
        enddo
        deallocate(zttgp)
       endif
@@ -3375,7 +3415,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
         zsum1(3)=zsum1(3)+SUM(zdtgp(:,jlev)/ztgp(:,jlev)*zgw(:)         &
      &                *acpd*(1.+adv*zqgp(:,jlev))*dp(:)/ga*dsigma(jlev) &
      &               ,mask=(zdtgp(:,jlev) >= 0.))
-        zsum1(4)=zsum1(4)+SUM(zdtgp(:,jlev)/ztgp(:,jlev)*zgw(:)         & 
+        zsum1(4)=zsum1(4)+SUM(zdtgp(:,jlev)/ztgp(:,jlev)*zgw(:)         &
      &                *acpd*(1.+adv*zqgp(:,jlev))*dp(:)/ga*dsigma(jlev) &
      &               ,mask=(zdtgp(:,jlev) < 0.))
        enddo
@@ -3414,7 +3454,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
          zdd = 1.0 / (1.0 + ndivdamp * 0.02)
          sdp(:,:) = sdp(:,:) * zdd
          write(nud,*) '### Damping with ',zdd
-         ndivdamp = ndivdamp - 1        
+         ndivdamp = ndivdamp - 1
       endif
 
       if (nkits == 0) then
@@ -3481,7 +3521,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
         if(nener3d > 0) then
          dener3d(:,jlev,5)=zttgp(:,jlev)                                &
      &                  *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
-        endif 
+        endif
        enddo
        call mpgallsp(ztt,zsttd,NLEV)
        ztt(:,:)=ztt(:,:)*ct*ww
@@ -3495,7 +3535,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
         if(nener3d > 0) then
          dener3d(:,jlev,24)=zttgp(:,jlev)                               &
      &                   *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
-        endif 
+        endif
        enddo
        deallocate(ztt)
        deallocate(zttgp)
@@ -3633,7 +3673,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
      &                -zu(:,jlev)*zu(:,jlev)                            &
      &                +zvn(:,jlev)*zvn(:,jlev)                          &
      &                -zv(:,jlev)*zv(:,jlev))/deltsec2                  &
-     &               *dp(:)/ga*dsigma(jlev)   
+     &               *dp(:)/ga*dsigma(jlev)
       enddo
       call gp2fc(zdekin,NLON,NLPP*NLEV)
       do jlev=1,NLEV
@@ -3646,7 +3686,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
       call fc2gp(zdekin,NLON,NLPP*NLEV)
       do jlev=1,NLEV
        zdtdt(:,jlev)=-zdekin(:,jlev)                                    &
-     &           *0.5/acpd/(1.+adv*dq(:,jlev))/dp(:)*ga/dsigma(jlev) 
+     &           *0.5/acpd/(1.+adv*dq(:,jlev))/dp(:)*ga/dsigma(jlev)
       enddo
       zdtdt(:,:)=zdtdt(:,:)/ct/ww
       call gp2fc(zdtdt,NLON,NLPP*NLEV)
@@ -3658,7 +3698,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 !     energy diagnostics
 !
       if(nenergy > 0) then
-       call mpgallsp(zstf1,zstt1,NLEV)       
+       call mpgallsp(zstf1,zstt1,NLEV)
        zstf1(:,:)=zstf1(:,:)*ct*ww
        call sp2fl(zstf1,zdtdt,NLEV)
        call fc2gp(zdtdt,NLON,NLPP*NLEV)
