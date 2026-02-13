@@ -44,3 +44,28 @@ to compile a single binary.
 On Fedora, install `openmpi-devel` for MPI and load it with `module load mpi`. For the postprocessor install `netcdf-cxx4-devel`
 
 On Debian, install `openmpi-bin` and `libopenmpi-dev` for MPI. For the postprocessor install `libnetcdf-c++4-devel`.
+
+## Usage
+
+Run the plasim command of the desired resolution and parallelism (for example, plasim_t21_l10_p1) from a directory containing the namelists for the model run. The namelists contain the configuration settings for the model. Required namelist files are:
+  - plasim_namelist
+  - miscmod_namelist
+  - fluxmod_namelist
+  - rainmod_namelist
+  - vegmod_namelist
+  - landmod_namelist
+  - radmod_namelist
+  - surfmod_namelist
+
+These are sample contents for the plasim_namelist:
+```
+  &plasim_nl
+   n_run_days = 5,
+   n_run_steps = 0,
+   n_run_months = 0,
+   n_run_years = 0,
+ /
+```
+Namelists are required, but can be practically empty, for example `rainmod_namelist` can contain `&rainmod_nl /`.
+
+The output file is called `plasim_output` by default and can be specified with the command line argument `-output _filename_`. It can be converted into NetCDF using the `srv2nc` scipt or the postprocessor `burn8`.
