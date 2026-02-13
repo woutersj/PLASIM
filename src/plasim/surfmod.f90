@@ -341,20 +341,33 @@
 !     initialize surface parameter
 !
       namelist/surfmod_nl/nspinit,nsurf,noromax
+      logical :: lex
 
       if (mypid == NROOT) then
-       open(11,file=surfmod_namelist)
-       read(11,surfmod_nl)
-       close(11)
-       write(nud,'(/,"***********************************************")')
-       write(nud,'("* SURFMOD ",a35," *")') trim(version)
-       write(nud,'("***********************************************")')
-       if (naqua /= 0) then
-       write(nud,'("* AQUA planet mode - ignoring land data       *")')
-       endif
-       write(nud,'("* Namelist SURFMOD_NL from <surfmod_namelist> *")')
-       write(nud,'("***********************************************")')
-       write(nud,surfmod_nl)
+         inquire(file=surfmod_namelist, exist=lex)
+         if (lex) then
+            open(11,file=surfmod_namelist)
+            read(11,surfmod_nl)
+            close(11)
+            write(nud,'(/,"***********************************************")')
+            write(nud,'("* SURFMOD ",a35," *")') trim(version)
+            write(nud,'("***********************************************")')
+            if (naqua /= 0) then
+               write(nud,'("* AQUA planet mode - ignoring land data       *")')
+            endif
+            write(nud,'("* Namelist SURFMOD_NL from <surfmod_namelist> *")')
+            write(nud,'("***********************************************")')
+            write(nud,surfmod_nl)
+         else
+            write(nud,'(/,"***********************************************")')
+            write(nud,'("* SURFMOD ",a35," *")') trim(version)
+            write(nud,'("***********************************************")')
+            if (naqua /= 0) then
+               write(nud,'("* AQUA planet mode - ignoring land data       *")')
+            endif
+            write(nud,'("* Namelist SURFMOD_NL not found - using defaults *")')
+            write(nud,'("***********************************************")')
+         endif
       endif
 
       call mpbci(nsurf)

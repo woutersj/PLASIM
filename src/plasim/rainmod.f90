@@ -66,6 +66,7 @@
       subroutine rainini
       use rainmod
 !
+      logical :: lex
       namelist/rainmod_nl/kbeta,nprl,nprc,ndca,ncsurf,nmoment,nshallow  &
      &       ,nstorain,rcrit,clwcrit1,clwcrit2,pdeep,rkshallow,gamma    &
      &       ,nclouds,pdeepth,nevapprec,nbeta,rhbeta,rbeta      
@@ -82,15 +83,24 @@
       rcrit(:)=MAX(0.85,MAX(sigma(:),1.-sigma(:)))
 !
       if(mypid==NROOT) then
-         open(11,file=rainmod_namelist)
-         read(11,rainmod_nl)
-         close(11)
-         write(nud,'(/," ***********************************************")')
-         write(nud,'(" * RAINMOD ",a35," *")') trim(version)
-         write(nud,'(" ***********************************************")')
-         write(nud,'(" * Namelist RAINMOD_NL from <rainmod_namelist> *")')
-         write(nud,'(" ***********************************************")')
-         write(nud,rainmod_nl)
+         inquire(file=rainmod_namelist, exist=lex)
+         if (lex) then
+            open(11,file=rainmod_namelist)
+            read(11,rainmod_nl)
+            close(11)
+            write(nud,'(/," ***********************************************")')
+            write(nud,'(" * RAINMOD ",a35," *")') trim(version)
+            write(nud,'(" ***********************************************")')
+            write(nud,'(" * Namelist RAINMOD_NL from <rainmod_namelist> *")')
+            write(nud,'(" ***********************************************")')
+            write(nud,rainmod_nl)
+         else
+            write(nud,'(/," ***********************************************")')
+            write(nud,'(" * RAINMOD ",a35," *")') trim(version)
+            write(nud,'(" ***********************************************")')
+            write(nud,'(" * Namelist RAINMOD_NL not found - using defaults *")')
+            write(nud,'(" ***********************************************")')
+         endif
       endif
 !
 !     broadcast namelist parameter

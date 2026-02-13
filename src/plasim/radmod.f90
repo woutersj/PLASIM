@@ -138,6 +138,7 @@
 !
 !**   0) define namelist
 !
+      logical :: lex
       namelist/radmod_nl/ndcycle,ncstsol,solclat,solcdec,no3,co2        &
      &               ,iyrbp,nswr,nlwr                                   &
      &               ,a0o3,a1o3,aco3,bo3,co3,toffo3,o3scale             &
@@ -254,15 +255,24 @@
       iyrbp = 1950 - n_start_year
 
       if (mypid==NROOT) then
-         open(11,file=radmod_namelist)
-         read(11,radmod_nl)
-         close(11)
-         write(nud,'(/," *********************************************")')
-         write(nud,'(" * RADMOD ",a34," *")') trim(version)
-         write(nud,'(" *********************************************")')
-         write(nud,'(" * Namelist RADMOD_NL from <radmod_namelist> *")')
-         write(nud,'(" *********************************************")')
-         write(nud,radmod_nl)
+         inquire(file=radmod_namelist, exist=lex)
+         if (lex) then
+            open(11,file=radmod_namelist)
+            read(11,radmod_nl)
+            close(11)
+            write(nud,'(/," *********************************************")')
+            write(nud,'(" * RADMOD ",a34," *")') trim(version)
+            write(nud,'(" *********************************************")')
+            write(nud,'(" * Namelist RADMOD_NL from <radmod_namelist> *")')
+            write(nud,'(" *********************************************")')
+            write(nud,radmod_nl)
+         else
+            write(nud,'(/," *********************************************")')
+            write(nud,'(" * RADMOD ",a34," *")') trim(version)
+            write(nud,'(" *********************************************")')
+            write(nud,'(" * Namelist RADMOD_NL not found - using defaults *")')
+            write(nud,'(" *********************************************")')
+         endif
       endif ! (mypid==NROOT)
 !
 !     broadcast namelist parameter
