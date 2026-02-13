@@ -22,7 +22,7 @@
       integer :: nstress = 1      ! switch for wind stress
       integer :: ntsa    = 2      ! flag for near surface temp calc.
 
-      real :: zumin      = 1.    ! minimum wind speed for PBL exhcange (m/s) 
+      real :: zumin      = 1.    ! minimum wind speed for PBL exhcange (m/s)
       real :: vdiff_lamm = 160.  ! const. used in vdiff (see parameterization)
       real :: vdiff_b    = 5.    !        "
       real :: vdiff_c    = 5.    !        "
@@ -395,7 +395,7 @@
       dvdt(:,NLEV)=dvdt(:,NLEV)+(zvn(:)-dv(:,NLEV))/deltsec2
 
 !
-!*    use loss of kinetic energy to warm the lower layer 
+!*    use loss of kinetic energy to warm the lower layer
 !     (for energy conservation)
 !
 
@@ -469,7 +469,7 @@
       endif
       if(nenergy > 0) then
        denergy(:,21)=zdtdt(:)*acpd*(1.+adv*dq(:,NLEV))*dp(:)            &
-     &              /ga*dsigma(NLEV) 
+     &              /ga*dsigma(NLEV)
        if(nener3d > 0) then
         dener3d(:,1:NLEM,21)=0.
         dener3d(:,NLEV,21)=denergy(:,21)
@@ -608,7 +608,7 @@
        if(nener3d > 0) then
         dener3d(:,1:NLEM,7)=0.
         dener3d(:,NLEV,7)=denergy(:,7)
-       endif  
+       endif
       endif
 !
       return
@@ -1023,7 +1023,7 @@
        dentropy(:,32)=0.
        do jlev=1,NLEV
         dentro(:)=zdtdt(:,jlev)/dentrot(:,jlev)                         &
-     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev) 
+     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)
         dentropy(:,8)=dentropy(:,8)+dentro(:)
         if(nentro3d > 0) dentro3d(:,jlev,8)=dentro(:)
         dentro(:)=-((zun(:,jlev)*zun(:,jlev)                            &
@@ -1033,7 +1033,7 @@
      &                  -(zken(:,jlev)-zke(:,jlev))/deltsec2)           &
      &                 *0.5*dentrop(:)/ga*dsigma(jlev)/dentrot(:,jlev)
         dentropy(:,32)=dentropy(:,32)+dentro(:)
-        if(nentro3d > 0) dentro3d(:,jlev,22)=dentro(:) 
+        if(nentro3d > 0) dentro3d(:,jlev,22)=dentro(:)
        enddo
       endif
       if(nenergy > 0) then
@@ -1059,7 +1059,7 @@
      &                        -zv(:,jlev)*zv(:,jlev))/deltsec2          &
      &                       -(zken(:,jlev)-zke(:,jlev))/deltsec2)      &
      &                     *0.5*dp(:)/ga*dsigma(jlev)
-        endif   
+        endif
        enddo
       endif
 !
