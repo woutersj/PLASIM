@@ -58,17 +58,27 @@
 !
       namelist/fluxmod_nl/nvdiff,nshfl,nevap,nstress,ntsa                  &
      &                ,zumin,vdiff_lamm,vdiff_b,vdiff_c,vdiff_d
+      logical :: lex
 !
       if(mypid==NROOT) then
-         open(11,file=fluxmod_namelist)
-         read(11,fluxmod_nl)
-         close(11)
-         write(nud,'(/," ***********************************************")')
-         write(nud,'(" * FLUXMOD ",a35," *")') trim(version)
-         write(nud,'(" ***********************************************")')
-         write(nud,'(" * Namelist FLUXMOD_NL from <fluxmod_namelist> *")')
-         write(nud,'(" ***********************************************")')
-         write(nud,fluxmod_nl)
+         inquire(file=fluxmod_namelist, exist=lex)
+         if (lex) then
+            open(11,file=fluxmod_namelist)
+            read(11,fluxmod_nl)
+            close(11)
+            write(nud,'(/," ***********************************************")')
+            write(nud,'(" * FLUXMOD ",a35," *")') trim(version)
+            write(nud,'(" ***********************************************")')
+            write(nud,'(" * Namelist FLUXMOD_NL from <fluxmod_namelist> *")')
+            write(nud,'(" ***********************************************")')
+            write(nud,fluxmod_nl)
+         else
+            write(nud,'(/," ***********************************************")')
+            write(nud,'(" * FLUXMOD ",a35," *")') trim(version)
+            write(nud,'(" ***********************************************")')
+            write(nud,'(" * Namelist FLUXMOD_NL not found - using defaults *")')
+            write(nud,'(" ***********************************************")')
+         endif
       endif
 
       call mpbci(nvdiff)
