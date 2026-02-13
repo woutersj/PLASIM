@@ -115,14 +115,14 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
          call get_command_argument(i, arg)
 
          ! Check for plasim_output option
-         if (arg == '-plasim_output' .or. arg == '--plasim_output') then
+         if (arg == '-output' .or. arg == '--output') then
             ! Get the next argument as the value
             if (i + 1 <= num_args) then
                call get_command_argument(i + 1, plasim_output)
                i = i + 2 ! Skip the value argument
             else
                if (mypid == NROOT) then
-                  write(nud,*) 'Error: Missing value for -plasim_output option'
+                  write(nud,*) 'Error: Missing value for -output option'
                endif
                i = i + 1
             endif
