@@ -125,6 +125,7 @@
 !
 !     initialize land surface
 !
+      logical :: file_exists
       namelist/landmod_nl/nlandt,nlandw,albland,dz0land,drhsland        &
      &                ,albsmin,albsmax,albsminf,albsmaxf                &
      &                ,albgmin,albgmax                                  &
@@ -149,16 +150,23 @@
       endif
 
       if (mypid == NROOT) then
-      open(12,file=landmod_namelist)
-      read(12,landmod_nl)
-      write(nud,'(/,"***********************************************")')
-      write(nud,'("* LANDMOD ",a35," *")') trim(version)
-      write(nud,'("***********************************************")')
-      write(nud,'("* Namelist LANDMOD_NL from <",a17,"> *")') &
-            landmod_namelist
-      write(nud,'("***********************************************")')
-      write(nud,landmod_nl)
-      close(12)
+        inquire(file=landmod_namelist, exist=file_exists)
+        if (.not. file_exists) then
+            write(nud,'(/,"***********************************************")')
+            write(nud,'("* WARNING: landmod_namelist file not found: ",a)') trim(landmod_namelist)
+            write(nud,'("***********************************************")')
+        else
+            open(12,file=landmod_namelist)
+            read(12,landmod_nl)
+            write(nud,'(/,"***********************************************")')
+            write(nud,'("* LANDMOD ",a35," *")') trim(version)
+            write(nud,'("***********************************************")')
+            write(nud,'("* Namelist LANDMOD_NL from <",a17,"> *")') &
+                    landmod_namelist
+            write(nud,'("***********************************************")')
+            write(nud,landmod_nl)
+            close(12)
+        endif
       endif
 
       if (wsmax < 0.0) wsmax = 0.0 ! Catch user error
