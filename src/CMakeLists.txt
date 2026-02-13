@@ -143,7 +143,7 @@ foreach(npro ${npros})
 
     # Add test that runs PLASIM for 5 days
     add_test(NAME ${PLASIM_BIN}_5day_test
-    COMMAND ${MPIEXEC_EXECUTABLE} -n ${npro} ../${PLASIM_BIN} -plasim_output test_5day_${nlat}_${nlev}_${npro}
+    COMMAND ${MPIEXEC_EXECUTABLE} -n ${npro} ../${PLASIM_BIN} -output test_5day_${nlat}_${nlev}_${npro}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_run)
 
     # Set test properties
