@@ -34,17 +34,27 @@
 !     initialization
 !
       namelist/miscmod_nl/nfixer,nudge,tnudget
-!
+      logical :: lex
+
       if (mypid == NROOT) then
-         open(11,file=miscmod_namelist)
-         read(11,miscmod_nl)
-         close(11)
-         write(nud,'(/," ***********************************************")')
-         write(nud,'(" * MISCMOD ",a35," *")') trim(version)
-         write(nud,'(" ***********************************************")')
-         write(nud,'(" * Namelist MISCMOD_NL from <miscmod_namelist> *")')
-         write(nud,'(" ***********************************************")')
-         write(nud,miscmod_nl)
+         inquire(file=miscmod_namelist, exist=lex)
+         if (lex) then
+            open(11,file=miscmod_namelist)
+            read(11,miscmod_nl)
+            close(11)
+            write(nud,'(/," ***********************************************")')
+            write(nud,'(" * MISCMOD ",a35," *")') trim(version)
+            write(nud,'(" ***********************************************")')
+            write(nud,'(" * Namelist MISCMOD_NL from <miscmod_namelist> *")')
+            write(nud,'(" ***********************************************")')
+            write(nud,miscmod_nl)
+         else
+            write(nud,'(/," ***********************************************")')
+            write(nud,'(" * MISCMOD ",a35," *")') trim(version)
+            write(nud,'(" ***********************************************")')
+            write(nud,'(" * Namelist MISCMOD_NL not found - using defaults *")')
+            write(nud,'(" ***********************************************")')
+         endif
       endif
 
       call mpbci(nfixer)
