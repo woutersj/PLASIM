@@ -80,7 +80,7 @@
 !
 !     2.5 orbital parameters
 !
-      integer, parameter :: ORB_UNDEF_INT  = 2000000000  
+      integer, parameter :: ORB_UNDEF_INT  = 2000000000
       real :: obliqr   ! Earth's obliquity in radians
       real :: lambm0   ! Mean longitude of perihelion at the
                        ! vernal equinox (radians)
@@ -101,11 +101,11 @@
 !
 !     auxiliary variables for solar zenit angle calculations
 !
-      real :: solclatcdec      ! cos(lat)*cos(decl) 
+      real :: solclatcdec      ! cos(lat)*cos(decl)
       real :: solslat          ! sin(lat)
       real :: solsdec          ! sin(decl)
-      real :: solslatsdec      ! sin(lat)*sin(decl) 
-      real :: zmuz             ! temporary zenit angle   
+      real :: solslatsdec      ! sin(lat)*sin(decl)
+      real :: zmuz             ! temporary zenit angle
 !
       end module radmod
 
@@ -148,8 +148,8 @@
 !     namelist parameter:
 !
 !     ndcycle : switch for daily cycle 1=on/0=off
-!     ncstsol : switch to set constant insolation 
-!     solclat : constant cosine of latitude of insolation 
+!     ncstsol : switch to set constant insolation
+!     solclat : constant cosine of latitude of insolation
 !     solcdec : constant solar declination
 !     no3     : switch for ozon 1=on/0=off
 !     co2     : co2 concentration (ppmv)
@@ -177,7 +177,7 @@
 !     gsol0   : solar constant (w/m2)
 !
       jtune=0
-      if(ndheat > 0) then 
+      if(ndheat > 0) then
        if(NTRU==21 .or. NTRU==1) then
         if(NLEV==5) then
          if(NDCYCLE==1) then
@@ -192,7 +192,7 @@
            th2oc=0.024
            jtune=1
           endif
-         endif 
+         endif
         elseif(NLEV==10) then
          if(NDCYCLE==1) then
           jtune=0
@@ -203,10 +203,10 @@
            th2oc=0.024
            tswr1=0.077
            tswr2=0.065
-           tswr3=0.0055 
+           tswr3=0.0055
            jtune=1
           endif
-         endif 
+         endif
         endif
        elseif(NTRU==31) then
         if(NLEV==10) then
@@ -602,7 +602,7 @@
        dentropy(:,29)=0.
        dentropy(:,30)=0.
        do jlev=1,NLEV
-        jlep=jlev+1  
+        jlep=jlev+1
         dentro(:)=dftu0(:,jlev)/dentrot(:,jlev)
         dentropy(:,29)=dentropy(:,29)+dentro(:)
         if(nentro3d > 0) dentro3d(:,jlev,19)=dentro(:)
@@ -624,7 +624,7 @@
         dentro(:)=-ga*(dftd(:,jlep)-dftd(:,jlev))                       &
      &           /(dsigma(jlev)*dp(:)*acpd*(1.+ADV*dq(:,jlev)))         &
      &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)&
-     &         /dentrot(:,jlev) 
+     &         /dentrot(:,jlev)
         dentropy(:,21)=dentropy(:,21)+dentro(:)
         if(nentro3d > 0) dentro3d(:,jlev,15)=dentro(:)
         dentro(:)=-ga*(dftu(:,jlep)-dftu(:,jlev))                       &
@@ -638,7 +638,7 @@
      &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)&
      &         /dentrot(:,jlev)
         dentropy(:,23)=dentropy(:,23)+dentro(:)
-        if(nentro3d > 0) dentro3d(:,jlev,17)=dentro(:) 
+        if(nentro3d > 0) dentro3d(:,jlev,17)=dentro(:)
         dentro(:)=-ga*(dftue2(:,jlep)-dftue2(:,jlev))                   &
      &           /(dsigma(jlev)*dp(:)*acpd*(1.+ADV*dq(:,jlev)))         &
      &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)&
@@ -661,12 +661,12 @@
        denergy(:,28)=0.
        do jlev=1,NLEV
         jlep=jlev+1
-        denergy(:,9)=denergy(:,9)-(dlwfl(:,jlep)-dlwfl(:,jlev))  
+        denergy(:,9)=denergy(:,9)-(dlwfl(:,jlep)-dlwfl(:,jlev))
         denergy(:,10)=denergy(:,10)-(dswfl(:,jlep)-dswfl(:,jlev))
-        denergy(:,17)=denergy(:,17)-(dftd(:,jlep)-dftd(:,jlev)) 
+        denergy(:,17)=denergy(:,17)-(dftd(:,jlep)-dftd(:,jlev))
         denergy(:,18)=denergy(:,18)-(dftu(:,jlep)-dftu(:,jlev))
         denergy(:,19)=denergy(:,19)-(dftue1(:,jlep)-dftue1(:,jlev))
-        denergy(:,20)=denergy(:,20)-(dftue2(:,jlep)-dftue2(:,jlev)) 
+        denergy(:,20)=denergy(:,20)-(dftue2(:,jlep)-dftue2(:,jlev))
         denergy(:,28)=denergy(:,28)+dt(:,jlev)*dsigma(jlev)
         if(nener3d > 0) then
          dener3d(:,jlev,9)=-(dlwfl(:,jlep)-dlwfl(:,jlev))
@@ -763,7 +763,7 @@
 !
       gmu0(:) = 0.0
       zmuz    = 0.0
-      zdawn = sin(dawn * PI / 180.0) ! compute dawn/dusk angle 
+      zdawn = sin(dawn * PI / 180.0) ! compute dawn/dusk angle
       zrlon = TWOPI / NLON           ! scale lambda to radians
       zrtim = TWOPI / 1440.0         ! scale time   to radians
       zmins = ihou * 60 + imin
@@ -785,7 +785,7 @@
        do jlat = 1 , NLPP
         do jlon = 0 , NLON-1
          jhor = jhor + 1
-         if (ndcycle == 1) then 
+         if (ndcycle == 1) then
           zhangle = zmins * zrtim - PI
           zmuz=solslatsdec+solclatcdec*cos(zhangle)
          else
@@ -1428,9 +1428,9 @@
       zh2o0a=0.846*(3.59E-5)**0.243  ! to get a(h2o)=0 for h2o=0
       zh2o0=0.832*0.0286**0.26       ! to get t(h2o)=1 for h2o=0
 !
-!     to make a(o3) continues at 0.01cm: 
+!     to make a(o3) continues at 0.01cm:
 !
-      zao3c=0.209*(0.01+7.E-5)**0.436-zao30-0.0212*log10(0.01) 
+      zao3c=0.209*(0.01+7.E-5)**0.436-zao30-0.0212*log10(0.01)
 !
 !     to make a(co2) continues at 1cm:
 !
@@ -1500,7 +1500,7 @@
        zsfac(:)=zzf1*zps2(:)
        zq(:,jlev)=zfh2o*zsfac(:)*dq(:,jlev)
        zqo3(:,jlev)=zfo3*zsfac(:)*dqo3(:,jlev)
-       zqco2(:,jlev)=zfco2*zzf2*zsfac(:)*dqco2(:,jlev) 
+       zqco2(:,jlev)=zfco2*zzf2*zsfac(:)*dqco2(:,jlev)
        if(clgray > 0) then
         ztaucc0(:,jlev)=1.-dcc(:,jlev)*clgray
        else

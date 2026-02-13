@@ -157,7 +157,7 @@
                   call mpabort('Wrong surface file')
                endif
             endif
-         endif ! (ilot < klot) 
+         endif ! (ilot < klot)
          close(ncodunit)
          kread = 1
          write(nud,'(" * Read ",A10,"    <",A,"> *")') yc,yf
@@ -186,7 +186,7 @@
       return
       end
 
-      
+
 !     ======================
 !     SUBROUTINE SURFACE_INI
 !     ======================
@@ -204,7 +204,7 @@
       logical :: lex           ! file exists
 
 !     Define code - arrayname relationship
- 
+
       call surfcode( 129,'doro'    )
       call surfcode( 172,'dls'     )
 
@@ -244,7 +244,7 @@
       call surfcode( 174,'dalbcl'  )   ! background albedo
       call surfcode(1740,'dalbcls' )   ! albedo for bare soil
       call surfcode(1741,'dalbclv' )   ! albedo for vegetation
-      call surfcode( 232,'dglac'   )   
+      call surfcode( 232,'dglac'   )
       call surfcode( 212,'dforest' )
       call surfcode( 229,'dwmax'   )
       call surfcode( 209,'dtclsoil')
@@ -300,7 +300,7 @@
                   endif
                enddo ! jmon
                close(ncodunit)
-               write(nud,'(" * Created <",A,"> from <",A,">  *")') & 
+               write(nud,'(" * Created <",A,"> from <",A,">  *")') &
                      yf,trim(ysfile)
             endif ! lex
             icmon = 0
@@ -311,7 +311,7 @@
          imon = ih(3)
          if (imon >= 100) imon = mod(imon/100,100)
          if (imon >= 0 .and. imon <= 13) then
-            if (nfreefo == 1) then 
+            if (nfreefo == 1) then
                read (nsurunit,*,IOSTAT=io) zy(:,imon)
             else
                read (nsurunit,yformat,IOSTAT=io) zy(:,imon)

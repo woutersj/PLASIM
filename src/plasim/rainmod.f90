@@ -25,8 +25,8 @@
       real :: clwcrit1 = -0.1 ! 1st critical vertical velocity for clouds
       real :: clwcrit2 =  0.0 ! 2nd critical vertical velocity for clouds
                               ! not active if clwcrit1 < clwcrit2
-      real :: pdeep   =999999.! pressure to destinguish deep and shallow con. 
-      real :: pdeepth = 70000.! pressure threshold for shallow con. 
+      real :: pdeep   =999999.! pressure to destinguish deep and shallow con.
+      real :: pdeepth = 70000.! pressure threshold for shallow con.
       real :: rkshallow = 10. ! diffusivity for shallow convection (m*m/s)
       real :: gamma   = 0.01  ! tuning parameter for evaporation of precip.
 
@@ -69,16 +69,16 @@
       logical :: lex
       namelist/rainmod_nl/kbeta,nprl,nprc,ndca,ncsurf,nmoment,nshallow  &
      &       ,nstorain,rcrit,clwcrit1,clwcrit2,pdeep,rkshallow,gamma    &
-     &       ,nclouds,pdeepth,nevapprec,nbeta,rhbeta,rbeta      
+     &       ,nclouds,pdeepth,nevapprec,nbeta,rhbeta,rbeta
 !
 !     reset defaults (according to general setup... tuning)
 !
       if(NTRU==21 .and. NLEV==5) then
        nshallow=0
-      endif 
+      endif
       if(NTRU==42 .and. NLEV==10) then
        gamma=0.007
-      endif    
+      endif
 !
       rcrit(:)=MAX(0.85,MAX(sigma(:),1.-sigma(:)))
 !
@@ -173,7 +173,7 @@
       if(ntime ==1) call mksecond(zsec1,0.)
 
       if(nprc == 1) call kuo
-     
+
       if(ntime ==1) then
        call mksecond(zsec1,zsec1)
        time4prc=time4prc+zsec1
@@ -200,7 +200,7 @@
        call mksecond(zsec1,zsec1)
        time4prl=time4prl+zsec1
       endif
-  
+
 !
 !*    rain and snow
 !
@@ -285,8 +285,8 @@
       pnoise(:) = znoise(1:n)
       return
       end subroutine get_random_root
-         
-      
+
+
 !     ================
 !     SUBROUTINE MKLSP
 !     ================
@@ -388,14 +388,14 @@
 !      Add noise to precipitation
 
        zqsto(:) = zqsat(:) ! modifiable zqsat
-       if (nstorain > 0) then 
-         do jhor = 1, NHOR 
+       if (nstorain > 0) then
+         do jhor = 1, NHOR
            call get_random_root(zrand,100) ! get 100 random numbers
            if (zq(jhor)<=zqsat(jhor).and.zq(jhor)>0.9*zqsat(jhor)) then
              zqdiffm = 0.0
              do j = 1 , 100
                zqdiff = (zrand(j)-0.5) * 0.2 * zqsat(jhor)
-               if (zqdiff > zqsat(jhor)-zq(jhor)) then 
+               if (zqdiff > zqsat(jhor)-zq(jhor)) then
                  zqdiffm = zqdiffm + zqdiff
                endif
              enddo ! j
@@ -512,7 +512,7 @@
 !
        if(nentropy > 0) then
         dentro(:)=zdtdt(:)/dentrot(:,jlev)                              &
-     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev) 
+     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)
         dentropy(:,11)=dentropy(:,11)+dentro(:)
         if(nentro3d > 0) dentro3d(:,jlev,11)=dentro(:)
        endif
@@ -520,7 +520,7 @@
         denergy(:,11)=denergy(:,11)                                     &
      &               +zdtdt(:)                                          &
      &               *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
-        if(nener3d > 0) then 
+        if(nener3d > 0) then
          dener3d(:,jlev,11)=zdtdt(:)                                    &
      &                   *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
         endif
@@ -837,7 +837,7 @@
 !      avoid negative qsat
 !
          zqsnl=AMIN1(zqsnl,rdbrv)
-! 
+!
          zcor=1./(1.-(1./rdbrv-1.)*zqsnl)
          zqsnl=zqsnl*zcor
 
@@ -1154,18 +1154,18 @@
 !
 !     kuo with beta
 !
-!     a) beta computed from rel. humidity       
+!     a) beta computed from rel. humidity
 !
        zrhm(:)=0.
        where(zpbeta(:) > 0.) zrhm(:)=zbeta(:)/zpbeta(:)
        zbeta(:)=1.
-       where(zrhm(:) >= rhbeta) 
+       where(zrhm(:) >= rhbeta)
         zbeta(:)=((1.-zrhm(:))/(1.-rhbeta))**nbeta
        endwhere
 !
 !     b) beta give explicitely (for sensitivity studies, etc.)
 
-       if(kbeta==2) zbeta(:)=rbeta        
+       if(kbeta==2) zbeta(:)=rbeta
 
        where(zpt(:) > 0.) zat(:)=zi(:)*(1.-zbeta(:))/zpt(:)
        where(zpq(:) > 0.) zaq(:)=zi(:)*zbeta(:)/zpq(:)
@@ -1177,7 +1177,7 @@
 !
 !
 !     select points for shallow convection: top pressure needed
-!     shallow convection if: 
+!     shallow convection if:
 !     a) not enought moisture convergence but unstable (zi=0)
 !     b) convection to shallow (ptop > pdeep)
 !
@@ -1523,7 +1523,7 @@
 !
       kktop(:)=1
       do jlev=2,NLEM
-       where(kshallow(:) > 0 .and. dp(:)*sigma(jlev) < pdeepth) 
+       where(kshallow(:) > 0 .and. dp(:)*sigma(jlev) < pdeepth)
         kktop(:)=jlev
        endwhere
       enddo
@@ -1599,7 +1599,7 @@
         zebs(:,jlev)=zkdiff(:,jlev)                                     &
      &              /(dsigma(jlev)+zkdiff(:,jlev)                       &
      &               +zkdiff(:,jlem)*(1.-zebs(:,jlem)))
-        zqn(:,jlev)=(zq(:,jlev)*dsigma(jlev)                            & 
+        zqn(:,jlev)=(zq(:,jlev)*dsigma(jlev)                            &
      &              +zkdiff(:,jlem)*zqn(:,jlem))                        &
      &             /(dsigma(jlev)+zkdiff(:,jlev)                        &
      &              +zkdiff(:,jlem)*(1.-zebs(:,jlem)))
@@ -1625,7 +1625,7 @@
 !     tendencies
 !
       do jlev=1,NLEV
-       where(kshallow(:) > 0)      
+       where(kshallow(:) > 0)
         pdqdt(:,jlev)=(zqn(:,jlev)-zq(:,jlev))/deltsec2
        endwhere
       enddo
@@ -1666,7 +1666,7 @@
 !
 !     bottom layer elimination
 !
-      where(kshallow(:) > 0) 
+      where(kshallow(:) > 0)
        ztn(:,NLEV)=(zt(:,NLEV)*dsigma(NLEV)                             &
      &             +zkdiff(:,NLEM)*ztn(:,NLEM)/zskap(NLEM))             &
      &            /(dsigma(NLEV)+zkdiff(:,NLEM)/zskap(NLEV)             &
@@ -1723,7 +1723,7 @@
        enddo
 !
 !     bottom layer elimination
-! 
+!
        where(kshallow(:) > 0)
         zun(:,NLEV)=(zu(:,NLEV)*dsigma(NLEV)+zkdiff(:,NLEM)*zun(:,NLEM))&
      &             /(dsigma(NLEV)+zkdiff(:,NLEM)*(1.-zebs(:,NLEM)))
@@ -1842,9 +1842,9 @@
          zztn=zprf1(nprhor,jlev)+zprf3(nprhor,jlev)*deltsec2
          zzqn=zprf2(nprhor,jlev)+zprf4(nprhor,jlev)*deltsec2
          write(nud,*)'L= ',jlev,' t= ',zprf1(nprhor,jlev)                    &
-     &                    ,' q= ',zprf2(nprhor,jlev)                    
+     &                    ,' q= ',zprf2(nprhor,jlev)
          write(nud,*)'L= ',jlev,' tnew= ',zztn,' dtdt= ',zprf3(nprhor,jlev)  &
-     &                    ,' qnew= ',zzqn,' dqdt= ',zprf4(nprhor,jlev)  
+     &                    ,' qnew= ',zzqn,' dqdt= ',zprf4(nprhor,jlev)
         enddo
        endif
        deallocate(zprf1)
@@ -2080,7 +2080,7 @@
        dentropy(:,13)=0.
        do jlev=1,NLEV
         dentro(:)=zdtdt(:,jlev)/dentrot(:,jlev)                         &
-     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev) 
+     &         *acpd*(1.+adv*dentroq(:,jlev))*dentrop(:)/ga*dsigma(jlev)
         dentropy(:,13)=dentropy(:,13)+dentro(:)
         if(nentro3d > 0) dentro3d(:,jlev,13)=dentro(:)
        enddo
@@ -2171,7 +2171,7 @@
         elsewhere(zprc(:)+zprl(:) > 0. .and. dt(:,NLEP) <= TMELT)
          zlcp(:)=(ALS-ALV)/(acpd*(1.+ADV*dq(:,jlev)))
          zdtdt(:,jlev)=(zprc(:)+zprl(:))/dsigma(jlev)*zlcp(:)           &
-     &                +zdtdt(:,jlev) 
+     &                +zdtdt(:,jlev)
          zprsc(:)=zprc(:)+zprsc(:)
          zprsl(:)=zprl(:)+zprsl(:)
          zprc(:)=0.
@@ -2186,7 +2186,7 @@
          zt(:)=dt(:,jlev)+dtdt(:,jlev)*deltsec2
 !
 !        saturation humidity
-! 
+!
          zqsat(:)=rdbrv*ra1*exp(ra2*(zt(:)-TMELT)/(zt(:)-ra4))          &
      &         /(dp(:)*sigma(jlev))
 !
@@ -2287,7 +2287,7 @@
          if(nener3d > 0) then
           dener3d(:,jlev,14)=zdtdt(:,jlev)                              &
      &                   *acpd*(1.+adv*dq(:,jlev))*dp(:)/ga*dsigma(jlev)
-         endif 
+         endif
        enddo
       endif
 
