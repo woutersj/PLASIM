@@ -146,6 +146,11 @@ foreach(npro ${npros})
     COMMAND ${MPIEXEC_EXECUTABLE} -n ${npro} ../${PLASIM_BIN} -output test_5day_${nlat}_${nlev}_${npro}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_run)
 
+    # Add command to convert output to NetCDF using srv2nc
+    add_test(NAME ${PLASIM_BIN}_5day_test_convert_to_netcdf
+    COMMAND ${CMAKE_SOURCE_DIR}/scripts/srv2nc test_5day_${nlat}_${nlev}_${npro}.srv test_5day_${nlat}_${nlev}_${npro}.nc
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_run)
+
     # Set test properties
     set_tests_properties(${PLASIM_BIN}_5day_test
         PROPERTIES
@@ -169,72 +174,8 @@ set(PLASIM_NAMELIST_CONTENT "
 ")
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_run/plasim_namelist " ${PLASIM_NAMELIST_CONTENT}")
 
-# Create miscmod_namelist file
-set(MISC_NAMELIST_CONTENT "
- &miscmod_nl
- /
-")
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_run/miscmod_namelist " ${MISC_NAMELIST_CONTENT}")
-
-# Create fluxmod_namelist file
-set(FLUX_NAMELIST_CONTENT "
- &fluxmod_nl
- /
-")
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_run/fluxmod_namelist " ${FLUX_NAMELIST_CONTENT}")
-
-# Create icemod_namelist file
-set(ICE_NAMELIST_CONTENT "
- &icemod_nl
- /
-")
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_run/icemod_namelist " ${ICE_NAMELIST_CONTENT}")
-
-# Create landmod_namelist file
-set(LAND_NAMELIST_CONTENT "
- &landmod_nl
- /
-")
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_run/landmod_namelist " ${LAND_NAMELIST_CONTENT}")
-
-# Create planet_namelist file
-set(PLANET_NAMELIST_CONTENT "
- &planet_nl
- /
-")
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_run/planet_namelist " ${PLANET_NAMELIST_CONTENT}")
-
-# Create radmod_namelist file
-set(RAD_NAMELIST_CONTENT "
- &radmod_nl
- /
-")
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_run/radmod_namelist " ${RAD_NAMELIST_CONTENT}")
-
-# Create rainmod_namelist file
-set(RAIN_NAMELIST_CONTENT "
- &rainmod_nl
- /
-")
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_run/rainmod_namelist " ${RAIN_NAMELIST_CONTENT}")
-
-# Create seamod_namelist file
-set(SEA_NAMELIST_CONTENT "
- &seamod_nl
- /
-")
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_run/seamod_namelist " ${SEA_NAMELIST_CONTENT}")
-
-# Create surfmod_namelist file
-set(SURF_NAMELIST_CONTENT "
- &surfmod_nl
- /
-")
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_run/surfmod_namelist " ${SURF_NAMELIST_CONTENT}")
-
-# Create vegmod_namelist file
-set(VEG_NAMELIST_CONTENT "
- &vegmod_nl
- /
-")
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_run/vegmod_namelist " ${VEG_NAMELIST_CONTENT}")
+set(BURN_NAMELIST_CONTENT
+"netcdf=1
+code=tas
+mean=1")
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_run/burn_conf " ${BURN_NAMELIST_CONTENT}")
