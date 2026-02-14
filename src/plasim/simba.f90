@@ -64,7 +64,7 @@ real            :: zwmax                ! bucket depth
 ! namelist variables
 
 integer         :: ncveg     = 1        ! vegetation accelerator
-real            :: forgrow   = 1.0      ! 
+real            :: forgrow   = 1.0      !
 real            :: rinidagg  = 0.5      ! initial value for dagg(:)
 real            :: rinidsc   = 1.0      ! initial value for dsc(:)
 real            :: rinidmr   = 2.0      ! initial value for dmr(:)
@@ -88,7 +88,7 @@ real, allocatable :: agpp(:)     ! gross primary production
 real, allocatable :: agppl(:)    ! light limited GPP
 real, allocatable :: agppw(:)    ! water limited GPP
 real, allocatable :: alitter(:)  ! litter production
-real, allocatable :: anogrow(:)  ! no growth allocation 
+real, allocatable :: anogrow(:)  ! no growth allocation
 real, allocatable :: anpp(:)     ! net primary production
 real, allocatable :: aresh(:)    ! heterotrophic respiration
 
@@ -118,18 +118,31 @@ implicit none
 
 namelist/vegmod_nl/ncveg,forgrow,rinidagg,rinidsc,rinidmr,rinisoil &
                   ,riniveg
+logical :: lex
 
-if (mypid == NROOT) then 
-   open(12,file=vegmod_namelist)
-   read(12,vegmod_nl)
-   write(nud,'(/,"***********************************************")')
-   write(nud,'("* VEGMOD: ",a35," *")') trim(veg_version)
-   write(nud,'("***********************************************")')
-   write(nud,'("* Namelist VEGMOD_NL from <",a18,"> *")') &
-         vegmod_namelist
-   write(nud,'("***********************************************")')
-   write(nud,vegmod_nl)
-   close(12)
+if (mypid == NROOT) then
+   inquire(file=surfmod_namelist, exist=lex)
+   if (lex) then
+        open(12,file=vegmod_namelist)
+        read(12,vegmod_nl)
+        write(nud,'(/,"***********************************************")')
+        write(nud,'("* VEGMOD: ",a35," *")') trim(veg_version)
+        write(nud,'("***********************************************")')
+        write(nud,'("* Namelist VEGMOD_NL from <",a18,"> *")') &
+                vegmod_namelist
+        write(nud,'("***********************************************")')
+        write(nud,vegmod_nl)
+        close(12)
+    else
+        write(nud,'(/,"***********************************************")')
+        write(nud,'("* SURFMOD ",a35," *")') trim(version)
+        write(nud,'("***********************************************")')
+        if (naqua /= 0) then
+        write(nud,'("* AQUA planet mode - ignoring land data       *")')
+        endif
+        write(nud,'("* Namelist SURFMOD_NL not found - using defaults *")')
+        write(nud,'("***********************************************")')
+    endif
 endif
 
 call mpbci(ncveg)
@@ -152,7 +165,7 @@ allocate(agpp(NHOR))    ; agpp(:)    = 0.0      ! gross primary production
 allocate(agppl(NHOR))   ; agppl(:)   = 0.0      ! light limited GPP
 allocate(agppw(NHOR))   ; agppw(:)   = 0.0      ! water limited GPP
 allocate(alitter(NHOR)) ; alitter(:) = 0.0      ! litter production
-allocate(anogrow(NHOR)) ; anogrow(:) = 0.0      ! no growth allocation 
+allocate(anogrow(NHOR)) ; anogrow(:) = 0.0      ! no growth allocation
 allocate(anpp(NHOR))    ; anpp(:)    = 0.0      ! net primary production
 allocate(aresh(NHOR))   ; aresh(:)   = 0.0      ! heterotrophic respiration
 
@@ -205,11 +218,11 @@ call writegp(40,dlai   ,200,0) ! leaf area index
 
 call writegp(40,agpp   ,300,0) ! gross primary production
 call writegp(40,anpp   ,301,0) ! net primary production
-call writegp(40,agppl  ,302,0) ! light limited GPP 
+call writegp(40,agppl  ,302,0) ! light limited GPP
 call writegp(40,agppw  ,303,0) ! water limited GPP
 call writegp(40,dcveg  ,304,0) ! vegetation carbon
 call writegp(40,dcsoil ,305,0) ! soil carbon
-call writegp(40,anogrow,306,0) ! no growth allocation 
+call writegp(40,anogrow,306,0) ! no growth allocation
 call writegp(40,aresh  ,307,0) ! heterotrophic respiration
 call writegp(40,alitter,308,0) ! litter production
 
