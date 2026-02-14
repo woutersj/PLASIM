@@ -65,6 +65,6 @@ These are sample contents for the plasim_namelist:
    n_run_years = 0,
  /
 ```
-Namelists are required, but can be practically empty, for example `rainmod_namelist` can contain `&rainmod_nl /`.
+Namelists can be practically empty, for example `rainmod_namelist` can contain `&rainmod_nl /`.
 
 The output file is called `plasim_output` by default and can be specified with the command line argument `-output _filename_`. It can be converted into NetCDF using the `srv2nc` scipt or the postprocessor `burn8`.
