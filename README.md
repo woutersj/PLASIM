@@ -47,8 +47,7 @@ On Debian, install `openmpi-bin` and `libopenmpi-dev` for MPI. For the postproce
 
 ## Usage
 
-Run the plasim command of the desired resolution and parallelism (for example, plasim_t21_l10_p1) from a directory containing the namelists for the model run. The namelists contain the configuration settings for the model. Required namelist files are:
-  - plasim_namelist
+Run the plasim command of the desired resolution and parallelism (for example, plasim_t21_l10_p1) from a directory containing the namelists for the model run. The namelists contain the configuration settings for the model. Only 'plasim_namelist' is required. Other possible namelist files are:
   - miscmod_namelist
   - fluxmod_namelist
   - rainmod_namelist
