@@ -44,7 +44,12 @@ fi
 
 infile=$1
 outfile=$2
-
+# Check if cdo is available
+if ! command -v cdo &> /dev/null; then
+    echo "Error: cdo (Climate Data Operators) is not installed or not in PATH"
+    echo "Please install cdo and ensure it is available in your PATH"
+    exit 1
+fi
 cdo="cdo -s"
 cdonctab="cdo -t ./param$$.tab -f nc -s"
 cdonc="cdo -f nc -s"
