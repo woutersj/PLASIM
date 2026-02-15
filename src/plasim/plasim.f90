@@ -1010,7 +1010,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
                    , ndiagsp   , ndiagsp2d , ndiagsp3d                  &
                    , ndl     , nentropy, nentro3d, neqsig  , nflux      &
                    , ngui    , nguidbg , nhdiff  , nhordif , nkits      &
-                   , noutput    &
+                   , noutput, noutvars    &
                    , npackgp , npacksp , nperpetual        , nprhor     &
                    , nprint  , nqspec  , nrad    , nsela   , nsync      &
                    , ntime   , ntspd   , nveg    , nwpd    &
@@ -1048,6 +1048,12 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
 
       open(11,file=plasim_namelist,form='formatted')
       read (11,plasim_nl)
+
+!     Read output variable list if specified
+      if (noutvars > 0) then
+         allocate(outvar_list(noutvars))
+         read (11,*) outvar_list(:)
+      endif
 
 !     aqua planet settings
 

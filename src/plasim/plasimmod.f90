@@ -160,6 +160,8 @@
       integer :: nkits    =  3  ! number of initial timesteps
       integer :: nrestart =  0  ! 1 for true, 0 for false
       integer :: nrad     =  1  ! switches radiation off/on  1/0
+      integer :: noutvars  =  0  ! number of specific output variables (0=all)
+      integer, allocatable :: outvar_list(:)  ! list of variable codes to output
       integer :: nflux    =  1  ! vertical diffusion 1/0
       integer :: nadv     =  1  ! advection 1/0=(y/n)
       integer :: nhordif  =  1  ! horizontal diffusion 1/0=(y/n)
