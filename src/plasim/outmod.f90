@@ -113,31 +113,37 @@
       subroutine outsp
       use pumamod
 
+      interface
+         function should_output_var (var_code)
+           logical :: should_output_var
+           integer, intent(in) :: var_code
+         end function should_output_var
+      end interface
 !     ************
 !     * orograpy *
 !     ************
 
-      call writesp(40,so,129,0,CV*CV,0.)
+      if (should_output_var(129)) call writesp(40,so,129,0,CV*CV,0.)
 
 !     ************
 !     * pressure *
 !     ************
 
-      call writesp(40,sp,152,0,1.0,log(psurf))
+      if (should_output_var(152)) call writesp(40,sp,152,0,1.0,log(psurf))
 
 !     ***************
 !     * temperature *
 !     ***************
-
-      do jlev = 1 , NLEV
-         call writesp(40,st(1,jlev),130,jlev,ct,t0(jlev) * ct)
-      enddo
+      if (should_output_var(130)) then
+        do jlev = 1 , NLEV
+            call writesp(40,st(1,jlev),130,jlev,ct,t0(jlev) * ct)
+        enddo
+      endif
 
 !     *********************
 !     * specific humidity *
 !     *********************
-
-      if (nqspec == 1) then
+      if (nqspec == 1 .and. should_output_var(133)) then
          do jlev = 1 , NLEV
             call writesp(40,sqout(1,jlev),133,jlev,1.0,0.0)
          enddo
@@ -146,21 +152,23 @@
 !     **************
 !     * divergence *
 !     **************
-
+      if (should_output_var(155)) then
       do jlev = 1 , NLEV
          call writesp(40,sd(1,jlev),155,jlev,ww,0.0)
       enddo
+      endif
 
 !     *************
 !     * vorticity *
 !     *************
-
+      if (should_output_var(138)) then
       do jlev = 1 , NLEV
          zsave = sz(3,jlev)
          sz(3,jlev) = sz(3,jlev) - plavor
          call writesp(40,sz(1,jlev),138,jlev,ww,0.0)
          sz(3,jlev) = zsave
       enddo
+      endif
 
       return
       end
@@ -172,6 +180,13 @@
 
       subroutine outgp
       use pumamod
+
+      interface
+         function should_output_var (var_code)
+           logical :: should_output_var
+           integer, intent(in) :: var_code
+         end function should_output_var
+      end interface
 
 !     *********************
 !     * specific humidity *
@@ -187,19 +202,19 @@
 !     * mixed-layer depth (from ocean) *
 !     **********************************
 
-      call writegp(40,dmld,110,0)
+      if (should_output_var(110)) call writegp(40,dmld,110,0)
 
 !     ***********************
 !     * surface temperature *
 !     ***********************
 
-      call writegp(40,dt(1,NLEP),139,0)
+      if (should_output_var(139)) call writegp(40,dt(1,NLEP),139,0)
 
 !     ****************
 !     * soil wetness *
 !     ****************
 
-      call writegp(40,dwatc,140,0)
+      if (should_output_var(140)) call writegp(40,dwatc,140,0)
 
 !     **************
 !     * snow depth *
@@ -663,3 +678,27 @@
 !
       return
       end
+
+!     ==============================
+!     FUNCTION SHOULD_OUTPUT_VAR
+!     ==============================
+
+      logical function should_output_var(var_code)
+      use pumamod
+      integer, intent(in) :: var_code
+!     Check if variable should be output based on noutvars and outvar_list
+
+      should_output_var = .true. ! Default: output all variables
+
+!     If noutvars > 0, only output variables in the list
+      if (noutvars > 0) then
+         should_output_var = .false. ! Default to false
+         if (allocated(outvar_list)) then
+            if (any(outvar_list == var_code)) then
+               should_output_var = .true.
+            endif
+         endif
+      endif
+
+      return
+      end function should_output_var
