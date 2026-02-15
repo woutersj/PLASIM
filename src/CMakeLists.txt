@@ -23,7 +23,8 @@ message(STATUS "Planet='${planet}'")
 # 32 64
 set(nlats 32 64 CACHE STRING "number of atmospheric latitudes")
 # Allowed values
-# set_property(CACHE nlats PROPERTY STRINGS 16 24 32 48 64 96 128 160 192 256 512 1024 2048)
+# set_property(CACHE nlats PROPERTY STRINGS
+#                   16 24 32 48 64 96 128 160 192 256 512 1024 2048)
 message(STATUS "number of latitudes='${nlats}'")
 
 # 10 20
@@ -32,10 +33,10 @@ message(STATUS "number of levels='${nlevs}'")
 
 # 4 8
 if(WITH_MPI)
-	set(npros 1 4 CACHE STRING "number of processors")
+    set(npros 1 4 CACHE STRING "number of processors")
 else()
-	message(STATUS "MPI disabled: using 1 processor")
-	set(npros 1  CACHE STRING "number of processors")
+    message(STATUS "MPI disabled: using 1 processor")
+    set(npros 1  CACHE STRING "number of processors")
 endif()
 
 message(STATUS "number of processors='${npros}'")
@@ -45,14 +46,15 @@ message(STATUS "number of processors='${npros}'")
 #
 
 if(WITH_MPI)
-  find_package(MPI REQUIRED COMPONENTS Fortran)
-  include_directories(${MPI_Fortran_INCLUDE_DIRS})
+    find_package(MPI REQUIRED COMPONENTS Fortran)
+    include_directories(${MPI_Fortran_INCLUDE_DIRS})
 endif()
 #
 # build flags
 #
 
-set (CMAKE_Fortran_FLAGS_RELEASE "-cpp -funroll-all-loops -fno-f2c -O3 -std=legacy")
+set (CMAKE_Fortran_FLAGS_RELEASE
+    "-cpp -funroll-all-loops -fno-f2c -O3 -std=legacy")
 set (CMAKE_Fortran_FLAGS "-cpp -funroll-all-loops -fno-f2c -O3 -std=legacy")
 set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g")
 
@@ -64,13 +66,14 @@ set(PLASIM_F_SRCS plasimmod.f90 icemod.f90 oceanmod.f90 resmod_stub.f90
                     tracermod.f90 surfmod.f90 rainmod.f90 outmod.f90
                     radmod.f90 legmod.f90 landmod.f90
                     calmod.f90  fftmod.f90 p_${planet}.f90
-                    fluxmod.f90 miscmod.f90 restartmod.f90 tpcore.f90 gaussmod.f90
+                    fluxmod.f90 miscmod.f90 restartmod.f90
+                    tpcore.f90 gaussmod.f90
                     seamod.f90 simba.f90 trc_routines.f90)
 
 if(WITH_MPI)
-  list(APPEND PLASIM_F_SRCS mpimod.f90)
+    list(APPEND PLASIM_F_SRCS mpimod.f90)
 else()
-  list(APPEND PLASIM_F_SRCS mpimod_stub.f90)
+    list(APPEND PLASIM_F_SRCS mpimod_stub.f90)
 endif()
 
 if(WITH_COUPLER)
@@ -104,60 +107,77 @@ endif()
 #
 
 foreach(nlat ${nlats})
-foreach(nlev ${nlevs})
-foreach(npro ${npros})
-    # ntru = floor( (2*nlat-1) / 3 ), floor is performed automatically upon conversion to int
-    math(EXPR ntru "(2*${nlat} - 1)/3")
-    # message(STATUS "spectral truncation='${ntru}'")
+    foreach(nlev ${nlevs})
+        foreach(npro ${npros})
+            # ntru = floor( (2*nlat-1) / 3 ), floor is performed automatically upon conversion to int
+            math(EXPR ntru "(2*${nlat} - 1)/3")
+            # message(STATUS "spectral truncation='${ntru}'")
 
-    # Set a directory to store resolution specific Fortran modules. We are building many copies with the same name, but different resolutions. Otherwise their modules clash in a parellel make (e.g. -j4).
-    set( CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Mod_t${ntru}_l${nlev}_p${npro} )
+            # Set a directory to store resolution specific Fortran modules.
+            # We are building many copies with the same name, but different resolutions.
+            # Otherwise their modules clash in a parellel make (e.g. -j4).
+            set( CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Mod_t${ntru}_l${nlev}_p${npro} )
 
-    set(PLASIM_BIN ${PLASIM_BIN0}_t${ntru}_l${nlev}_p${npro})
-    message(STATUS "PLASIM_BIN='${PLASIM_BIN}'")
+            set(PLASIM_BIN ${PLASIM_BIN0}_t${ntru}_l${nlev}_p${npro})
+            message(STATUS "PLASIM_BIN='${PLASIM_BIN}'")
 
-    add_executable(${PLASIM_BIN} plasim/plasim.f90 ${PLASIM_C_SRCS} ${PLASIM_F_SRCS})
+            add_executable(${PLASIM_BIN} plasim/plasim.f90
+                ${PLASIM_C_SRCS} ${PLASIM_F_SRCS})
 
-    target_compile_definitions(${PLASIM_BIN} PUBLIC NLAT_ATM=${nlat})
-    target_compile_definitions(${PLASIM_BIN} PUBLIC NLEV_ATM=${nlev})
-    target_compile_definitions(${PLASIM_BIN} PUBLIC NPRO_ATM=${npro})
+            target_compile_definitions(${PLASIM_BIN} PUBLIC NLAT_ATM=${nlat})
+            target_compile_definitions(${PLASIM_BIN} PUBLIC NLEV_ATM=${nlev})
+            target_compile_definitions(${PLASIM_BIN} PUBLIC NPRO_ATM=${npro})
 
-    if(WITH_GUI)
-        target_link_libraries(${PLASIM_BIN} ${MPI_Fortran_LIBRARIES} ${X11_LIBRARIES})
-    else()
-        target_link_libraries(${PLASIM_BIN} ${MPI_Fortran_LIBRARIES})
-    endif()
+            if(WITH_GUI)
+                target_link_libraries(${PLASIM_BIN} ${MPI_Fortran_LIBRARIES} ${X11_LIBRARIES})
+            else()
+                target_link_libraries(${PLASIM_BIN} ${MPI_Fortran_LIBRARIES})
+            endif()
 
-    if(MPI_COMPILE_FLAGS)
-    set_target_properties(${PLASIM_BIN} PROPERTIES
+            if(MPI_COMPILE_FLAGS)
+                set_target_properties(${PLASIM_BIN} PROPERTIES
         COMPILE_FLAGS "${MPI_Fortran_COMPILE_FLAGS}")
-    endif()
+            endif()
 
-    if(MPI_LINK_FLAGS)
-    set_target_properties(${PLASIM_BIN} PROPERTIES
+            if(MPI_LINK_FLAGS)
+                set_target_properties(${PLASIM_BIN} PROPERTIES
         LINK_FLAGS "${MPI_Fortran_LINK_FLAGS}")
-    endif()
+            endif()
 
-    # install binary
-    INSTALL(TARGETS ${PLASIM_BIN} DESTINATION bin)
+            # install binary
+            INSTALL(TARGETS ${PLASIM_BIN} DESTINATION bin)
 
-    # Add test that runs PLASIM for 5 days
-    add_test(NAME ${PLASIM_BIN}_5day_test
-    COMMAND ${MPIEXEC_EXECUTABLE} -n ${npro} ../${PLASIM_BIN} -output test_5day_${nlat}_${nlev}_${npro}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_run)
+            # Add test that runs PLASIM for 5 days
+            add_test(NAME ${PLASIM_BIN}_5day_test
+                COMMAND ${MPIEXEC_EXECUTABLE}
+                -n ${npro}
+                ../${PLASIM_BIN}
+                -output test_5day_${nlat}_${nlev}_${npro}.srv
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_run)
 
-    # Add command to convert output to NetCDF using srv2nc
-    add_test(NAME ${PLASIM_BIN}_5day_test_convert_to_netcdf
-    COMMAND ${CMAKE_SOURCE_DIR}/scripts/srv2nc test_5day_${nlat}_${nlev}_${npro}.srv test_5day_${nlat}_${nlev}_${npro}.nc
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_run)
+            # Add command to convert output to NetCDF using srv2nc
+            add_test(NAME ${PLASIM_BIN}_5day_test_srv2nc
+                COMMAND ${CMAKE_SOURCE_DIR}/scripts/srv2nc
+                test_5day_${nlat}_${nlev}_${npro}.srv
+                test_5day_${nlat}_${nlev}_${npro}.nc
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_run)
 
-    # Set test properties
-    set_tests_properties(${PLASIM_BIN}_5day_test
+            # Add command to convert output to NetCDF using postprocessor
+            add_test(NAME ${PLASIM_BIN}_5day_test_burn
+                COMMAND sh -c "../../postprocessor/burn8 \
+                test_5day_${nlat}_${nlev}_${npro}.srv \
+                test_5day_${nlat}_${nlev}_${npro}.nc \
+                 < burn_conf"
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_run
+            )
+
+            # Set test properties
+            set_tests_properties(${PLASIM_BIN}_5day_test
         PROPERTIES
         TIMEOUT 300
         LABELS "plasim;integration")
-endforeach()
-endforeach()
+        endforeach()
+    endforeach()
 endforeach()
 
 # Create a test directory if it doesn't exist
@@ -176,6 +196,5 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_run/plasim_namelist " ${PLASIM_NAMEL
 
 set(BURN_NAMELIST_CONTENT
 "netcdf=1
-code=tas
-mean=1")
+code=tas")
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_run/burn_conf " ${BURN_NAMELIST_CONTENT}")
