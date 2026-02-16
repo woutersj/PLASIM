@@ -42,6 +42,13 @@ endif()
 message(STATUS "number of processors='${npros}'")
 
 #
+# Check for NetCDF Fortran library
+#
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(NETCDF_FORTRAN REQUIRED netcdf-fortran)
+
+#
 # MPI
 #
 
