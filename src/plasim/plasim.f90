@@ -597,6 +597,7 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
          if (mypid == NROOT) then
             if (mod(nstep,nafter) == 0 .and. noutput > 0) then
                call outsp
+               call test_nc
             endif
             if (mod(nstep,ndiag) == 0) then
                call diag
