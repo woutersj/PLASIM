@@ -315,7 +315,7 @@ if [ -z "$flsg" ]; then
 # If not LSG
 # If spectral fix grids
 if [ ! -z "$fsp" ]; then
-  $cdo splitgrid ${infile} grid_$$_
+  $cdo splitgrid ${infile} grid_$$_ # Splits a dataset into pieces, one for each different grid
   $cdonctab $fmonth $fyear $fixzgrid -setgrid,$spgrid grid_$$_02.srv spectral$$.nc
   $cdonctab $fmonth $fyear $fixzgrid $delcode333 -setgrid,$gpgrid grid_$$_01.srv gaussian$$.nc
   $cdozip merge spectral$$.nc gaussian$$.nc tempfile$$.nc
