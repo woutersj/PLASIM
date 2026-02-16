@@ -35,6 +35,10 @@
       return
       end
 
+      subroutine test_nc(kunit,pf,kcode,klev)
+          use netcdf
+      end
+
 !     ==================
 !     SUBROUTINE WRITEGP
 !     ==================

@@ -47,7 +47,7 @@ message(STATUS "number of processors='${npros}'")
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(NETCDF_FORTRAN REQUIRED netcdf-fortran)
-
+include_directories(${NETCDF_FORTRAN_INCLUDE_DIRS})
 #
 # MPI
 #
@@ -136,9 +136,9 @@ foreach(nlat ${nlats})
             target_compile_definitions(${PLASIM_BIN} PUBLIC NPRO_ATM=${npro})
 
             if(WITH_GUI)
-                target_link_libraries(${PLASIM_BIN} ${MPI_Fortran_LIBRARIES} ${X11_LIBRARIES})
+                target_link_libraries(${PLASIM_BIN} ${MPI_Fortran_LIBRARIES} ${NETCDF_FORTRAN_LIBRARIES} ${X11_LIBRARIES})
             else()
-                target_link_libraries(${PLASIM_BIN} ${MPI_Fortran_LIBRARIES})
+                target_link_libraries(${PLASIM_BIN} ${MPI_Fortran_LIBRARIES} ${NETCDF_FORTRAN_LIBRARIES})
             endif()
 
             if(MPI_COMPILE_FLAGS)
