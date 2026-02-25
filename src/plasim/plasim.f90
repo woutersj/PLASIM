@@ -41,7 +41,7 @@
 !
 !     UPDATE VERSION IDENTIFIER AFTER EACH CODE CHANGE!
 
-plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
+plasimversion = "https://github.com/woutersj/PLASIM/ : 25-Feb-2026"
 
       call mpstart(-1)       ! -1: Start MPI   >=0 arg = MPI_COMM_WORLD
       call parse_command_line_args
@@ -95,6 +95,16 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
       return
       end
 
+      subroutine print_help
+          write(nud,*) 'Run the Planet Simulator climate model'
+          write(nud,*) 'Usage: plasim [-dump <dump_file>] [-restart <restart_file>] [-output <output_file>] [-log <log_file>]'
+          write(nud,*) 'Options:'
+          write(nud,*) '  -dump <dump_file>  :  save the state of the model to <dump_file> at the end of the simulation'
+          write(nud,*) '  -restart <restart_file>  :  load the state of the model from <restart_file> at the start of the simulation'
+          write(nud,*) '  -output <output_file>  :  output model data to <output_file>'
+          write(nud,*) '  -log <log_file>  :  save log messages to <log_file>'
+      end
+
 !     *********************************
 !     * SUBROUTINE PARSE_COMMAND_LINE_ARGS *
 !     *********************************
@@ -114,21 +124,77 @@ plasimversion = "https://github.com/Edilbert/PLASIM/ : 15-Dec-2015"
       do while (i <= num_args)
          call get_command_argument(i, arg)
 
-         ! Check for plasim_output option
-         if (arg == '-output' .or. arg == '--output') then
-            ! Get the next argument as the value
+         select case (arg)
+         case ('-h', '-help', '--help')
+           if (mypid == NROOT) then
+             call print_help()
+           endif
+           call mpstop
+           stop
+         case ('-output', '--output')
             if (i + 1 <= num_args) then
-               call get_command_argument(i + 1, plasim_output)
-               i = i + 2 ! Skip the value argument
+                call get_command_argument(i + 1, plasim_output)
+                i = i + 1
             else
-               if (mypid == NROOT) then
-                  write(nud,*) 'Error: Missing value for -output option'
-               endif
-               i = i + 1
+                if (mypid == NROOT) then
+                    write(nud,*) 'Error: Missing value for -output option'
+                endif
+                call mpstop
+                stop
             endif
-         else
-            i = i + 1
-         endif
+         case ('-dump', '--dump')
+            if (i + 1 <= num_args) then
+                call get_command_argument(i + 1, plasim_status)
+                i = i + 1
+            else
+                if (mypid == NROOT) then
+                    write(nud,*) 'Error: Missing value for -dump option'
+                endif
+                call mpstop
+                stop
+            endif
+         case ('-restart', '--restart')
+            if (i + 1 <= num_args) then
+                call get_command_argument(i + 1, plasim_restart)
+                i = i + 1
+            else
+                if (mypid == NROOT) then
+                    write(nud,*) 'Error: Missing value for -restart option'
+                endif
+                call mpstop
+                stop
+            endif
+         case ('-log', '--log')
+            if (i + 1 <= num_args) then
+                call get_command_argument(i + 1, plasim_diag)
+                i = i + 1
+            else
+                if (mypid == NROOT) then
+                    write(nud,*) 'Error: Missing value for -log option'
+                endif
+                call mpstop
+                stop
+            endif
+         case ('-rundays', '--rundays')
+            if (i + 1 <= num_args) then
+                call get_command_argument(i + 1, plasim_diag)
+                i = i + 1
+            else
+                if (mypid == NROOT) then
+                    write(nud,*) 'Error: Missing value for -nrundays option'
+                endif
+                call mpstop
+                stop
+            endif
+         case default
+            if (mypid == NROOT) then
+                write(nud,*) 'ERROR: Unrecognized command-line option: ', arg
+                call print_help()
+            endif
+            call mpstop
+            stop
+         end select
+         i = i + 1
       end do
 
       return

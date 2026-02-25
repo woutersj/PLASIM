@@ -21,19 +21,19 @@ set_property(CACHE planet PROPERTY STRINGS earth mars exo)
 message(STATUS "Planet='${planet}'")
 
 # 32 64
-set(nlats 32 64 CACHE STRING "number of atmospheric latitudes")
+set(nlats 32 64 CACHE STRING "number of atmospheric latitudes (32 for T21, 64 for T42, seperate multiple values by ;)")
 # Allowed values
 # set_property(CACHE nlats PROPERTY STRINGS
 #                   16 24 32 48 64 96 128 160 192 256 512 1024 2048)
 message(STATUS "number of latitudes='${nlats}'")
 
 # 10 20
-set(nlevs 10 20 CACHE STRING "number of atmospheric levels")
+set(nlevs 10 20 CACHE STRING "number of atmospheric levels (seperate multiple values by ;)")
 message(STATUS "number of levels='${nlevs}'")
 
 # 4 8
 if(WITH_MPI)
-    set(npros 1 4 CACHE STRING "number of processors")
+    set(npros 1 4 CACHE STRING "number of processors (seperate multiple values by ;)")
 else()
     message(STATUS "MPI disabled: using 1 processor")
     set(npros 1  CACHE STRING "number of processors")
@@ -109,14 +109,14 @@ endif()
 foreach(nlat ${nlats})
     foreach(nlev ${nlevs})
         foreach(npro ${npros})
-            # ntru = floor( (2*nlat-1) / 3 ), floor is performed automatically upon conversion to int
+            # ntru = floor( (2*nlat-1) / 3 )
+            # floor is performed automatically upon conversion to int
             math(EXPR ntru "(2*${nlat} - 1)/3")
             # message(STATUS "spectral truncation='${ntru}'")
 
             # Set a directory to store resolution specific Fortran modules.
-            # We are building many copies with the same name, but different resolutions.
             # Otherwise their modules clash in a parellel make (e.g. -j4).
-            set( CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Mod_t${ntru}_l${nlev}_p${npro} )
+            set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Mod_t${ntru}_l${nlev}_p${npro})
 
             set(PLASIM_BIN ${PLASIM_BIN0}_t${ntru}_l${nlev}_p${npro})
             message(STATUS "PLASIM_BIN='${PLASIM_BIN}'")
@@ -159,14 +159,14 @@ foreach(nlat ${nlats})
             add_test(NAME ${PLASIM_BIN}_5day_test_srv2nc
                 COMMAND ${CMAKE_SOURCE_DIR}/scripts/srv2nc
                 test_5day_${nlat}_${nlev}_${npro}.srv
-                test_5day_${nlat}_${nlev}_${npro}.nc
+                test_5day_${nlat}_${nlev}_${npro}_srv2nc.nc
                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_run)
 
             # Add command to convert output to NetCDF using postprocessor
             add_test(NAME ${PLASIM_BIN}_5day_test_burn
                 COMMAND sh -c "../../postprocessor/burn8 \
                 test_5day_${nlat}_${nlev}_${npro}.srv \
-                test_5day_${nlat}_${nlev}_${npro}.nc \
+                test_5day_${nlat}_${nlev}_${npro}_burn.nc \
                  < burn_conf"
                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_run
             )
@@ -194,7 +194,9 @@ set(PLASIM_NAMELIST_CONTENT "
 ")
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_run/plasim_namelist " ${PLASIM_NAMELIST_CONTENT}")
 
+# Create a simple namelist file to test the post-processor
 set(BURN_NAMELIST_CONTENT
 "netcdf=1
-code=tas")
+code=tas,hus
+mean=0")
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/test_run/burn_conf " ${BURN_NAMELIST_CONTENT}")

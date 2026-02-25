@@ -37,24 +37,22 @@
       logical :: lex
 
       if (mypid == NROOT) then
+         write(nud,'(/," ***********************************************")')
+         write(nud,'(" * MISCMOD ",a35," *")') trim(version)
+         write(nud,'(" ***********************************************")')
          inquire(file=miscmod_namelist, exist=lex)
          if (lex) then
             open(11,file=miscmod_namelist)
             read(11,miscmod_nl)
             close(11)
-            write(nud,'(/," ***********************************************")')
-            write(nud,'(" * MISCMOD ",a35," *")') trim(version)
+
+            write(nud,'(" * Namelist <",a,"> for module MISCMOD *")') trim(miscmod_namelist)
             write(nud,'(" ***********************************************")')
-            write(nud,'(" * Namelist MISCMOD_NL from <miscmod_namelist> *")')
-            write(nud,'(" ***********************************************")')
-            write(nud,miscmod_nl)
          else
-            write(nud,'(/," ***********************************************")')
-            write(nud,'(" * MISCMOD ",a35," *")') trim(version)
-            write(nud,'(" ***********************************************")')
-            write(nud,'(" * Namelist MISCMOD_NL not found - using defaults *")')
+            write(nud,'(" * Namelist <",a,"> for module MISCMOD not found - using defaults *")') trim(miscmod_namelist)
             write(nud,'(" ***********************************************")')
          endif
+         write(nud,miscmod_nl)
       endif
 
       call mpbci(nfixer)

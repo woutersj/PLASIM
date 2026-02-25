@@ -59,7 +59,7 @@
 !      * filenames & units *
 !      *********************
 
-      integer :: nud = 6 ! plasim_diag 
+      integer :: nud = 6 ! plasim_diag
       integer :: nut = 7 ! reusable temporary unit
 
       character (256) :: plasim_namelist     = "plasim_namelist"
@@ -69,9 +69,9 @@
       character (256) :: rainmod_namelist    = "rainmod_namelist"
       character (256) :: surfmod_namelist    = "surfmod_namelist"
       character (256) :: plasim_output       = "plasim_output"
-      character (256) :: plasim_diag         = "plasim_diag"
+      character (256) :: plasim_diag         = "plasim_log"
       character (256) :: plasim_restart      = "plasim_restart"
-      character (256) :: plasim_status       = "plasim_status"
+      character (256) :: plasim_status       = "plasim_dump"
       character (256) :: planet_namelist     = "planet_namelist"
       character (256) :: efficiency_dat      = "efficiency.dat"
       character (256) :: icemod_namelist     = "icemod_namelist"
@@ -139,7 +139,7 @@
       integer :: ndatim(7)       =      -1 ! date & time array
       real    :: tmstart         =     0.0 ! start of run
 
-      
+
 
 !     **************************
 !     * Global Integer Scalars *
@@ -147,7 +147,7 @@
 
       integer :: kick     =  1  ! add noise for kick > 0
       integer :: restkick =  0  ! add noise according to the kick variable on restart if restkick > 0
-      real    :: epskick  =  2.e-3 ! noise strength 
+      real    :: epskick  =  2.e-3 ! noise strength
       integer :: mars     =  0  ! global switch for planet mars
       integer :: noutput  =  1  ! master switch for output: 0=no output
       integer :: nafter   =  0  ! write data interval: 0 = once per day
@@ -291,7 +291,7 @@
 !     * Global Gridpoint Arrays (dimensionalized) *
 !     *********************************************
 
-      real :: dt(NHOR,NLEP)   = 0.     ! temperature 
+      real :: dt(NHOR,NLEP)   = 0.     ! temperature
       real :: dq(NHOR,NLEP)   = 0.     ! spec. humidity
       real :: du(NHOR,NLEP)   = 0.     ! zonal wind [m/s]
       real :: dv(NHOR,NLEP)   = 0.     ! meridional wind [m/s]
@@ -306,8 +306,8 @@
       real :: dudt(NHOR,NLEP) = 0.     ! u-tendency
       real :: dvdt(NHOR,NLEP) = 0.     ! v-tendency
       real :: dp0(NHOR)       = 0.     ! surface pressure at time t
-      real :: du0(NHOR,NLEP)  = 0.     ! zonal wind at time t 
-      real :: dv0(NHOR,NLEP)  = 0.     ! meridional wind at time t 
+      real :: du0(NHOR,NLEP)  = 0.     ! zonal wind at time t
+      real :: dv0(NHOR,NLEP)  = 0.     ! meridional wind at time t
       real :: dtrace(NLON,NLAT,NLEV,NTRACE) = 1.0 ! Trace array
 
 !     *************
@@ -475,10 +475,10 @@
       ! ***************
       ! * Random seed *
       ! ***************
-      
+
       integer              :: seed(8) = 0 ! settable in namelist
       integer, allocatable :: meed(:)     ! machine dependent seed
-      
+
 !     **********************
 !     * Multirun variables *
 !     **********************
@@ -491,7 +491,7 @@
       integer :: mrdim   =  0   ! Exchange dimension  (min. NRSP)
       integer :: nsync   =  0   ! Synchronization on or off
       integer, allocatable :: mrtru(:) ! Truncations of members
-      
+
       real    :: syncstr  =  0.0 ! Coupling strength (0 .. 1)
       real    :: synctime =  0.0 ! Coupling time [days]
 
