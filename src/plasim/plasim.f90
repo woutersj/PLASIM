@@ -177,7 +177,8 @@ plasimversion = "https://github.com/woutersj/PLASIM/ : 25-Feb-2026"
             endif
          case ('-rundays', '--rundays')
             if (i + 1 <= num_args) then
-                call get_command_argument(i + 1, plasim_diag)
+                call get_command_argument(i + 1, arg)
+                read(unit=arg, fmt='(I10)') n_run_days
                 i = i + 1
             else
                 if (mypid == NROOT) then
