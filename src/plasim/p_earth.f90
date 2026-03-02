@@ -73,10 +73,14 @@ if (mypid == NROOT) then
       open (nut,file=planet_namelist)
       read (nut,planet_nl)
       close(nut)
+      write(nud,'(/,"****************************************")')
+      write(nud,'("* planet_nl from    <",a,"> *")') trim(planet_namelist)
+      write(nud,'("****************************************")')
+   else
+      write(nud,'(/,"****************************************")')
+      write(nud,'("* Namelist file for planet not found, using defaults *")')
+      write(nud,'("****************************************")')
    endif
-   write(nud,'(/,"****************************************")')
-   write(nud,'("* planet_nl from    <",a16,"> *")') planet_namelist
-   write(nud,'("****************************************")')
    write(nud,planet_nl)
 
 endif ! (mypid == NROOT)
@@ -144,7 +148,7 @@ return
  3000 format('* ',a24,1x,a11,f10.4,' *')
  3010 format('* ',a24,1x,a11,10x  ,' *')
  4000 format(/)
-      end  
+      end
 
 
 !          ===========
@@ -162,4 +166,3 @@ end
 subroutine planet_stop
 return
 end
-

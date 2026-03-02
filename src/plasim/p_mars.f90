@@ -90,7 +90,7 @@ if (mypid == NROOT) then
       close(nut)
    endif
    write(nud,'(/,"****************************************")')
-   write(nud,'("* planet_nl from    <",a16,"> *")') planet_namelist
+   write(nud,'("* planet_nl from    <",a,"> *")') trim(planet_namelist)
    write(nud,'("****************************************")')
    write(nud,planet_nl)
 
@@ -142,7 +142,7 @@ write(nud,3000) 'Perihelion'       ,'[10^6 km]'   ,p_perihelion
 write(nud,3000) 'Aphelion'         ,'[10^6 km]'   ,p_aphelion
 write(nud,3000) 'Orbit eccentricity'    ,' '      ,eccen
 write(nud,3000) 'Gas constant'          ,' '      ,gascon
-write(nud,3000) 'Mean surface pressure' ,'[Pa]'   ,psurf 
+write(nud,3000) 'Mean surface pressure' ,'[Pa]'   ,psurf
 write(nud,1000)
 write(nud,4000)
 
@@ -153,7 +153,7 @@ return
  2000 format('* ',a24,1x,a11,a10,' *')
  3000 format('* ',a24,1x,a11,f10.4,' *')
  4000 format(/)
-      end  
+      end
 
 
 !          ===========
@@ -171,4 +171,3 @@ end
 subroutine planet_stop
 return
 end
-
