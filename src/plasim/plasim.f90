@@ -67,11 +67,25 @@ plasimversion = "https://github.com/woutersj/PLASIM/ : 25-Feb-2026"
       use pumamod
 
       character (3) :: mrext
+      character(len=1) :: filesep
+      character(len=255) :: val
+      integer            :: length, rc
 
       if (mrpid <  0) then
         mrext = "" ! no multirun
       else
         write(mrext,'("_",i2.2)') mrpid
+      endif
+
+      call get_environment_variable('OSTYPE', val, length, rc)
+      if (rc == 0 .and. length > 0 .and. (index(val, 'win') > 0 .or. index(val, 'msys') > 0)) then
+        filesep = '\'
+      else
+        filesep = '/'
+      endif
+
+      if (namelist_dir /= "" .and. namelist_dir(len(namelist_dir):) /= filesep) then
+          namelist_dir = trim(namelist_dir) // filesep
       endif
 
       plasim_namelist     = trim(namelist_dir) // trim(plasim_namelist    ) // mrext
