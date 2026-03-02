@@ -153,7 +153,7 @@
         inquire(file=landmod_namelist, exist=file_exists)
         if (.not. file_exists) then
             write(nud,'(/,"***********************************************")')
-            write(nud,'("* WARNING: landmod_namelist file not found: ",a)') trim(landmod_namelist)
+            write(nud,'("* Namelist <",a,"> for module LANDMOD not found - using defaults *")') trim(landmod_namelist)
             write(nud,'("***********************************************")')
         else
             open(12,file=landmod_namelist)

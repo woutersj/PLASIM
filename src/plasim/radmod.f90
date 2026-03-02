@@ -270,7 +270,7 @@
             write(nud,'(/," *********************************************")')
             write(nud,'(" * RADMOD ",a34," *")') trim(version)
             write(nud,'(" *********************************************")')
-            write(nud,'(" * Namelist RADMOD_NL not found - using defaults *")')
+            write(nud,'(" * Namelist for RADMOD not found - using defaults *")')
             write(nud,'(" *********************************************")')
          endif
       endif ! (mypid==NROOT)

@@ -76,7 +76,7 @@
             write(nud,'(/," ***********************************************")')
             write(nud,'(" * FLUXMOD ",a35," *")') trim(version)
             write(nud,'(" ***********************************************")')
-            write(nud,'(" * Namelist FLUXMOD_NL not found - using defaults *")')
+            write(nud,'(" * Namelist for FLUXMOD not found - using defaults *")')
             write(nud,'(" ***********************************************")')
          endif
       endif

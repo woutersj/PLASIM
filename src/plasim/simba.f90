@@ -140,7 +140,7 @@ if (mypid == NROOT) then
         if (naqua /= 0) then
         write(nud,'("* AQUA planet mode - ignoring land data       *")')
         endif
-        write(nud,'("* Namelist SURFMOD_NL not found - using defaults *")')
+        write(nud,'("* Namelist for SURFMOD not found - using defaults *")')
         write(nud,'("***********************************************")')
     endif
 endif

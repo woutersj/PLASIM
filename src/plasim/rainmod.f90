@@ -98,7 +98,7 @@
             write(nud,'(/," ***********************************************")')
             write(nud,'(" * RAINMOD ",a35," *")') trim(version)
             write(nud,'(" ***********************************************")')
-            write(nud,'(" * Namelist RAINMOD_NL not found - using defaults *")')
+            write(nud,'(" * Namelist for RAINMOD not found - using defaults *")')
             write(nud,'(" ***********************************************")')
          endif
       endif
