@@ -1091,6 +1091,7 @@ plasimversion = "https://github.com/woutersj/PLASIM/ : 25-Feb-2026"
                    , psurf                                              &
                    , restim  , t0      , tfrc                           &
                    , sigh    , nenergy , nener3d , nsponge , dampsp
+      logical :: lex
 !
 !     preset namelist parameter according to model set up
 !
@@ -1112,9 +1113,18 @@ plasimversion = "https://github.com/woutersj/PLASIM/ : 25-Feb-2026"
 !
 !     read namelist
 !
-
-      open(11,file=plasim_namelist,form='formatted')
-      read (11,plasim_nl)
+      inquire(file=plasim_namelist, exist=lex)
+      if (lex) then
+        open(11,file=plasim_namelist,form='formatted')
+        read (11,plasim_nl)
+        write(nud,'(/,"****************************************")')
+        write(nud,'("* Plasim namelist read from <",a16,"> *")') plasim_namelist
+        write(nud,'("****************************************")')
+      else
+        write(nud,'(" ***********************************************")')
+        write(nud,'(" * PlaSim namelist <",a16,"> not found - using defaults *")') trim(plasim_namelist)
+        write(nud,'(" ***********************************************")')
+      endif
 
 !     Read output variable list if specified
       if (noutvars > 0) then
@@ -1190,7 +1200,7 @@ plasimversion = "https://github.com/woutersj/PLASIM/ : 25-Feb-2026"
       if (synctime > 0.0) syncstr = 1.0 / (TWOPI * synctime)
 
       write(nud,'(/,"****************************************")')
-      write(nud,'("* plasim_nl from    <",a16,"> *")') plasim_namelist
+      write(nud,'("* plasim_nl *")')
       write(nud,'("****************************************")')
       write(nud,plasim_nl)
 
