@@ -47,7 +47,10 @@ On Debian, install `openmpi-bin` and `libopenmpi-dev` for MPI. For the postproce
 
 ## Usage
 
-Run the plasim command of the desired resolution and parallelism (for example, plasim_t21_l10_p1) from a directory containing the namelists for the model run. The namelists contain the configuration settings for the model. Only 'plasim_namelist' is required. Other possible namelist files are:
+Run the PlaSim command of the desired resolution and parallelism (for example, `plasim_t21_l10_p1` for `T21` horizontal spectral resolution with 10 vertical levels on one processor). Binaries compiled with MPI need to be run on the correct number of processors, e.g. through `mpiexec -np 4 plasim_t21_l10_p4`.
+
+Some settings (run length and filenames for data and settings) can be set from the command line. Most settings are set by running PlaSim from a directory containing Fortran namelist files containing the model settings. Possible namelist files are:
+  - plasim_namelist
   - miscmod_namelist
   - fluxmod_namelist
   - rainmod_namelist
@@ -56,7 +59,7 @@ Run the plasim command of the desired resolution and parallelism (for example, p
   - radmod_namelist
   - surfmod_namelist
 
-These are sample contents for the plasim_namelist:
+Variables inside a namelist are specified by a sequence of `key=value` pairs in a group. Keys are case-insensitive. There must be at least one comma, space, tab or newline between variables. The namelist starts with `&<group name>` and ends with a single `/`. The namelist filename for module called `mymod` is `mymod_namelist`, containing a group name `mymod_nl`. For example, `plasim_namelist` could contain the following:
 ```
   &plasim_nl
    n_run_days = 5,
@@ -65,6 +68,8 @@ These are sample contents for the plasim_namelist:
    n_run_years = 0,
  /
 ```
-Namelists can be practically empty, for example `rainmod_namelist` can contain `&rainmod_nl /`.
+Settings in namelists override corresponding command line settings.
+
+The run length can be set to either a number of days (with the `-days` argument or `n_run_days` in `plasim_namelist`), or to a number of years and months (with `-months` and `-years`, or `n_run_years` and `n_run_years`). If `days` is set it will override `years` and `months` settings. For example, a run set with 50 days and 1 month will finish after 50 days.
 
 The output file is called `plasim_output` by default and can be specified with the command line argument `-output _filename_`. It can be converted into NetCDF using the `srv2nc` scipt or the postprocessor `burn8`.
