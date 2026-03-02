@@ -62,6 +62,7 @@
       integer :: nud = 6 ! plasim_diag
       integer :: nut = 7 ! reusable temporary unit
 
+      character (256) :: namelist_dir        = ""
       character (256) :: plasim_namelist     = "plasim_namelist"
       character (256) :: radmod_namelist     = "radmod_namelist"
       character (256) :: miscmod_namelist    = "miscmod_namelist"

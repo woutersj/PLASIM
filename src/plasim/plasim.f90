@@ -68,29 +68,31 @@ plasimversion = "https://github.com/woutersj/PLASIM/ : 25-Feb-2026"
 
       character (3) :: mrext
 
-      if (mrpid <  0) return ! no multirun
+      if (mrpid <  0) then
+        mrext = "" ! no multirun
+      else
+        write(mrext,'("_",i2.2)') mrpid
+      endif
 
-      write(mrext,'("_",i2.2)') mrpid
-
-      plasim_namelist     = trim(plasim_namelist    ) // mrext
-      radmod_namelist     = trim(radmod_namelist    ) // mrext
-      miscmod_namelist    = trim(miscmod_namelist   ) // mrext
-      fluxmod_namelist    = trim(fluxmod_namelist   ) // mrext
-      rainmod_namelist    = trim(rainmod_namelist   ) // mrext
-      surfmod_namelist    = trim(surfmod_namelist   ) // mrext
+      plasim_namelist     = trim(namelist_dir) // trim(plasim_namelist    ) // mrext
+      radmod_namelist     = trim(namelist_dir) // trim(radmod_namelist    ) // mrext
+      miscmod_namelist    = trim(namelist_dir) // trim(miscmod_namelist   ) // mrext
+      fluxmod_namelist    = trim(namelist_dir) // trim(fluxmod_namelist   ) // mrext
+      rainmod_namelist    = trim(namelist_dir) // trim(rainmod_namelist   ) // mrext
+      surfmod_namelist    = trim(namelist_dir) // trim(surfmod_namelist   ) // mrext
+      planet_namelist     = trim(namelist_dir) // trim(planet_namelist    ) // mrext
+      icemod_namelist     = trim(namelist_dir) // trim(icemod_namelist    ) // mrext
+      oceanmod_namelist   = trim(namelist_dir) // trim(oceanmod_namelist  ) // mrext
+      landmod_namelist    = trim(namelist_dir) // trim(landmod_namelist   ) // mrext
+      vegmod_namelist     = trim(namelist_dir) // trim(vegmod_namelist    ) // mrext
+      seamod_namelist     = trim(namelist_dir) // trim(seamod_namelist    ) // mrext
       plasim_output       = trim(plasim_output      ) // mrext
       plasim_diag         = trim(plasim_diag        ) // mrext
       plasim_restart      = trim(plasim_restart     ) // mrext
       plasim_status       = trim(plasim_status      ) // mrext
-      planet_namelist     = trim(planet_namelist    ) // mrext
       efficiency_dat      = trim(efficiency_dat     ) // mrext
-      icemod_namelist     = trim(icemod_namelist    ) // mrext
       ice_output          = trim(ice_output         ) // mrext
-      oceanmod_namelist   = trim(oceanmod_namelist  ) // mrext
       ocean_output        = trim(ocean_output       ) // mrext
-      landmod_namelist    = trim(landmod_namelist   ) // mrext
-      vegmod_namelist     = trim(vegmod_namelist    ) // mrext
-      seamod_namelist     = trim(seamod_namelist    ) // mrext
 
       return
       end
@@ -98,11 +100,15 @@ plasimversion = "https://github.com/woutersj/PLASIM/ : 25-Feb-2026"
       subroutine print_help
           write(nud,*) 'Run the Planet Simulator climate model'
           write(nud,*) 'Usage: plasim [-dump <dump_file>] [-restart <restart_file>] [-output <output_file>] [-log <log_file>]'
+          write(nud,*) '              [-days <#days>] [-months <#months>] [-years <#years>] [-nldir <namelist_dir>]'
           write(nud,*) 'Options:'
           write(nud,*) '  -dump <dump_file>  :  save the state of the model to <dump_file> at the end of the simulation'
           write(nud,*) '  -restart <restart_file>  :  load the state of the model from <restart_file> at the start of the simulation'
           write(nud,*) '  -output <output_file>  :  output model data to <output_file>'
           write(nud,*) '  -log <log_file>  :  save log messages to <log_file>'
+          write(nud,*) '  -days <#days>  :  run for #days days (overrides -months and -years)'
+          write(nud,*) '  -months <#months> -years <#years> :  run for `12*#years + #months` months'
+          write(nud,*) '  -nldir <namelist_dir> :  look in directory <namelist_dir> for namelist files'
       end
 
 !     *********************************
@@ -207,6 +213,17 @@ plasimversion = "https://github.com/woutersj/PLASIM/ : 25-Feb-2026"
             else
                 if (mypid == NROOT) then
                     write(nud,*) 'Error: Missing value for -years option'
+                endif
+                call mpstop
+                stop
+            endif
+         case ('-nldir', '--nldir')
+            if (i + 1 <= num_args) then
+                call get_command_argument(i + 1, namelist_dir)
+                i = i + 1
+            else
+                if (mypid == NROOT) then
+                    write(nud,*) 'Error: Missing value for -nldir option'
                 endif
                 call mpstop
                 stop
