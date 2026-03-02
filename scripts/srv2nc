@@ -44,6 +44,10 @@ fi
 
 infile=$1
 outfile=$2
+if [ ! -f infile ]; then
+    echo "srv2nc: Input file $infile not found."
+    exit 1
+fi
 # Check if cdo is available
 if ! command -v cdo &> /dev/null; then
     echo "Error: cdo (Climate Data Operators) is not installed or not in PATH"
