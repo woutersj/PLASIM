@@ -183,6 +183,7 @@ endforeach()
 # Create a test directory if it doesn't exist
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_run)
 
+# TODO: Use FIXTURES_REQUIRED. Fixtures are a way to attach setup and cleanup tasks to a set of tests. Set up: create namelists before run, perform run before postprocessor
 # Create a simple namelist file for 5-day test run
 set(PLASIM_NAMELIST_CONTENT "
  &plasim_nl
