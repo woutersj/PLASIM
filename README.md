@@ -50,14 +50,14 @@ On Debian, install `openmpi-bin` and `libopenmpi-dev` for MPI. For the postproce
 Run the PlaSim command of the desired resolution and parallelism (for example, `plasim_t21_l10_p1` for `T21` horizontal spectral resolution with 10 vertical levels on one processor). Binaries compiled with MPI need to be run on the correct number of processors, e.g. through `mpiexec -np 4 plasim_t21_l10_p4`.
 
 Some settings (run length and filenames for data and settings) can be set from the command line. Most settings are set by running PlaSim from a directory containing Fortran namelist files containing the model settings. Possible namelist files are:
-  - plasim_namelist
-  - miscmod_namelist
-  - fluxmod_namelist
-  - rainmod_namelist
-  - vegmod_namelist
-  - landmod_namelist
-  - radmod_namelist
-  - surfmod_namelist
+  - `plasim_namelist`
+  - `miscmod_namelist`
+  - `fluxmod_namelist`
+  - `rainmod_namelist`
+  - `vegmod_namelist`
+  - `landmod_namelist`
+  - `radmod_namelist`
+  - `surfmod_namelist`
 
 Variables inside a namelist are specified by a sequence of `key=value` pairs in a group. Keys are case-insensitive. There must be at least one comma, space, tab or newline between variables. The namelist starts with `&<group name>` and ends with a single `/`. The namelist filename for module called `mymod` is `mymod_namelist`, containing a group name `mymod_nl`. For example, `plasim_namelist` could contain the following:
 ```
@@ -68,8 +68,14 @@ Variables inside a namelist are specified by a sequence of `key=value` pairs in 
    n_run_years = 0,
  /
 ```
+Model parameters can also be controlled in this way. For example, the atmospheric carbon dioxide concentration can be set in `radmod_namelist` as follows:
+```
+&radmod_nl CO2=400 /
+```
 Settings in namelists override corresponding command line settings.
 
 The run length can be set to either a number of days (with the `-days` argument or `n_run_days` in `plasim_namelist`), or to a number of years and months (with `-months` and `-years`, or `n_run_years` and `n_run_years`). If `days` is set it will override `years` and `months` settings. For example, a run set with 50 days and 1 month will finish after 50 days.
 
 The output file is called `plasim_output` by default and can be specified with the command line argument `-output _filename_`. It can be converted into NetCDF using the `srv2nc` scipt or the postprocessor `burn8`.
+
+The complete state of the model will be written to `plasim_dump` at the end of the run. This filename can be specified with the `-dump` option. This state can later be used to re-initialise the model with the `-restart` option. This can be useful to occassionally save model states in long runs. If the run is interrupted for any reason it can later be restarted from the state dump file.
