@@ -1,6 +1,6 @@
       module oceanmod
 
-      use resmod
+!      use resmod
 !
 !     version identifier (date)
 !

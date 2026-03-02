@@ -62,7 +62,7 @@ set (CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g")
 # Select source files
 #
 
-set(PLASIM_F_SRCS plasimmod.f90 icemod.f90 oceanmod.f90 resmod_stub.f90
+set(PLASIM_F_SRCS plasimmod.f90 icemod.f90 oceanmod.f90
                     tracermod.f90 surfmod.f90 rainmod.f90 outmod.f90
                     radmod.f90 legmod.f90 landmod.f90
                     calmod.f90  fftmod.f90 p_${planet}.f90
