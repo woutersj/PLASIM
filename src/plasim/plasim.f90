@@ -175,14 +175,38 @@ plasimversion = "https://github.com/woutersj/PLASIM/ : 25-Feb-2026"
                 call mpstop
                 stop
             endif
-         case ('-rundays', '--rundays')
+         case ('-days', '--days')
             if (i + 1 <= num_args) then
                 call get_command_argument(i + 1, arg)
                 read(unit=arg, fmt='(I10)') n_run_days
                 i = i + 1
             else
                 if (mypid == NROOT) then
-                    write(nud,*) 'Error: Missing value for -nrundays option'
+                    write(nud,*) 'Error: Missing value for -days option'
+                endif
+                call mpstop
+                stop
+            endif
+         case ('-months', '--months')
+            if (i + 1 <= num_args) then
+                call get_command_argument(i + 1, arg)
+                read(unit=arg, fmt='(I10)') n_run_months
+                i = i + 1
+            else
+                if (mypid == NROOT) then
+                    write(nud,*) 'Error: Missing value for -months option'
+                endif
+                call mpstop
+                stop
+            endif
+         case ('-years', '--years')
+            if (i + 1 <= num_args) then
+                call get_command_argument(i + 1, arg)
+                read(unit=arg, fmt='(I10)') n_run_years
+                i = i + 1
+            else
+                if (mypid == NROOT) then
+                    write(nud,*) 'Error: Missing value for -years option'
                 endif
                 call mpstop
                 stop
