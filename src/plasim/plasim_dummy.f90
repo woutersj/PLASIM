@@ -87,7 +87,7 @@
       integer :: nstep    = 0           ! time step
       integer :: naccuout = 0           ! counter for accumulated output
       integer :: nrestart = 0           ! switch for restart
-      integer :: n_run_years = 0 
+      integer :: n_run_years = 0
       integer :: n_run_months = 0
       integer :: n_run_days   = -1
       integer :: n_start_step = 0
@@ -183,7 +183,7 @@
 
       namelist/clpar/ntspd,nafter,n_run_days,n_run_months,n_run_years  &
      &              ,n_start_year,n_start_month,nlsg,climatefile       &
-     &              ,surface     
+     &              ,surface
 !
 !     get process id
 !
@@ -204,7 +204,7 @@
          n_start_step = ntspd * (n_start_year     * n_days_per_year     &
                       + (n_start_month-1) * n_days_per_month)
          if(n_run_years > 0) n_run_months=n_run_years*12
-      endif 
+      endif
 !
       call mpbci(ntspd)
       call mpbci(nlsg)
@@ -221,7 +221,7 @@
       call calini(n_days_per_month,n_days_per_year,n_start_step,ntspd   &
      &           ,solar_day,mypid)
 !
-      if(mypid == NROOT) then 
+      if(mypid == NROOT) then
        call restart_ini(lrestart,'climate_restart')
        if (lrestart) then
         nrestart = 1
@@ -380,12 +380,12 @@
        call mpscgp(zls,ccls,1)
 !
 !     make clsst >= tfreeze
-! 
+!
        do jm=0,13
         ccsst(:,jm)=AMAX1(ccsst(:,jm),TFREEZE)
        enddo
 !
-!     initialize 
+!     initialize
 !
        naccuout=0
 !
@@ -509,14 +509,14 @@
 !
 !     set climate (exept sst which is set later according to oceanmod)
 !
-      yls(:)=ccls(:) 
+      yls(:)=ccls(:)
       ytaux(:)=cltaux(:)
       ytauy(:)=cltauy(:)
       yprl(:)=clprl(:)
       yprc(:)=clprc(:)
       yevap(:)=clevap(:)
-      ypme(:)=clprl(:)+clprc(:)+clevap(:) 
-      yroff(:)=clroff(:) 
+      ypme(:)=clprl(:)+clprc(:)+clevap(:)
+      yroff(:)=clroff(:)
       yicesnow(:)=cliced(:)*CRHOI/1000.+clsnow(:)
       yheat(:)=clswr(:)+cllwr(:)+clshf(:)+cllhf(:)
 !
@@ -814,4 +814,3 @@
       real :: pa(kdim,0:13)
       return
       end
-

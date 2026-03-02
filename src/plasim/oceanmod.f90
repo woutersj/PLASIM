@@ -41,8 +41,8 @@
       integer :: nprhor           = 0   ! gp to print debug information
       integer :: nhdiff           = 0   ! switch for horizontal heat diffusion
       integer :: nentropy         = 0   ! switch for entropy diagnostics
-      integer :: nlsg             = 0   ! coupling flag to lsg   
-      integer :: naomod           = 320 ! atmos/ocean(lsg) ration    
+      integer :: nlsg             = 0   ! coupling flag to lsg
+      integer :: naomod           = 320 ! atmos/ocean(lsg) ration
 
 !
       real :: dlayer(NLEV_OCE)  = 50.   ! layer depth (m)
@@ -138,7 +138,7 @@
       real (kind=8) :: zgw(NLAT)
       real :: zgw2(NLON,NLAT)
       real :: zls(NLON*NLAT)
-      integer :: nlem_oce = NLEV_OCE - 1 
+      integer :: nlem_oce = NLEV_OCE - 1
       character (*) :: oceanmod_namelist
       character (*) :: ocean_output
 !
@@ -228,7 +228,7 @@
        do jlev=1,(NLEV_OCE-1)
           vdiffk(jlev)=(dlayer(jlev)*vdiffkl(jlev)                      &
      &                 +dlayer(jlev+1)*vdiffkl(jlev+1))                 &
-     &                /(dlayer(jlev)+dlayer(jlev+1)) 
+     &                /(dlayer(jlev)+dlayer(jlev+1))
        enddo
       endif
 !
@@ -264,7 +264,7 @@
             ysst(:,jlev) = yclsst2(:)
          enddo
 
-      else ! restart from restart file 
+      else ! restart from restart file
          if (mypid == NROOT) then
             call get_restart_integer('nstep'   ,nstep   )
             call get_restart_integer('naccuoce',naccuout)
@@ -305,9 +305,9 @@
        if(mypid == nroot) then
 !
 !      check if day_per_year are right (lsg coupling needs 360)
-! 
+!
         if(kdpy .ne. 360.) then
-         write(*,*) '!ERROR! for LSG coupling you need to set '         
+         write(*,*) '!ERROR! for LSG coupling you need to set '
          write(*,*) '        n_days_per_year in plasim namelist INP '
          write(*,*) '        to 360 !'
          write(*,*) '        at the moment, n_days_per_year= ',kdpy
@@ -434,7 +434,7 @@
         if(nprint > 0) then
          write(nud,*)'call for LSG coupling'
         endif
-!         
+!
         call clsgstep(ndatim,nstep,zsst,ztaux,ztauy,zpme,zroff,zice     &
      &               ,zheat,zfldo)
        endif
@@ -449,7 +449,7 @@
 !
       call mksst
 !
-!     if lsg coupling due to ahfl and osst, replace ssts 
+!     if lsg coupling due to ahfl and osst, replace ssts
 !
       if(nlsg > 1) then
        if(mod(nstep,naomod) == naomod-1) call mpscgp(zsst,ysst,1)
@@ -508,7 +508,7 @@
 !
       endif
 !
-!     make global average of flux into ice 
+!     make global average of flux into ice
 !
       if (nfluko > 0) call mkiflx
 !
@@ -1039,7 +1039,7 @@
       zsst(:)=ysst(:,1)
       if(nentropy > 0) zssto(:)=zsst(:)
 !
-!     distinguish diffent cases to treat sea ice 
+!     distinguish diffent cases to treat sea ice
 !
       do jhor=1,NHOR
        if(yls(jhor) < 1.) then
@@ -1052,7 +1052,7 @@
          if(ycliced(jhor) > 0.) then
 !
 !       b) ice and climatological ice: use fluco to get T -> Tclim
-!          (i.e. Tclim is used as 'freezing temperature') and 
+!          (i.e. Tclim is used as 'freezing temperature') and
 !          give the residuum to the ice (melt/freeze).
 !
           ztfreeze(jhor)=yclsst2(jhor)
@@ -1069,7 +1069,7 @@
           else
            yifluxr(jhor)=yifluxr(jhor)-yfsst2(jhor)
           endif
-         else 
+         else
 !
 !       c) ice but no climatological ice:
 !          - add fluco
@@ -1106,7 +1106,7 @@
 !
 !      entropy diagnostics
 !
-      if(nentropy > 0) then 
+      if(nentropy > 0) then
        where(yls < 1.)
         yentro(:,3)=(zsst(:)-zssto(:))*ymld(:,1)/zcpsdt/zssto(:)
        endwhere
@@ -1157,14 +1157,14 @@
 !
       real,allocatable :: zprf1(:)
 !
-!     since ifluxr could be locally large a global avergage 
+!     since ifluxr could be locally large a global avergage
 !     ifluxr is computed which goes into the sea ice model
 !
 !!      zsum(1)=SUM(yifluxr(:)*gw(:),MASK=(yls(:) < 1.))
 !!      zsum(2)=SUM(gw(:),MASK=(yls(:) < 1.))
 !!      call mpsumbcr(zsum,2)
 !!      if(zsum(1) /= 0.) then
-       where(yls(:) < 1.) 
+       where(yls(:) < 1.)
 !!        yifluxr(:)=zsum(1)/zsum(2)
         yiflux(:)=yiflux(:)+yifluxr(:)
        end where
@@ -1388,4 +1388,3 @@
       enddo
 !
       end subroutine hdiffo
-

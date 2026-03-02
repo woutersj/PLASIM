@@ -49,12 +49,12 @@
       integer :: nprhor = 0        ! gp for debug printout
       integer :: nentropy = 0      ! switch for entropy diagnostics
       integer :: ngui   = 0        ! switch for gui
-      integer :: naout  = 0        ! no additional output fields 
+      integer :: naout  = 0        ! no additional output fields
 !
       real :: taunc         =  0.  ! time scale for newtonian cooling
       real :: xmind         = 0.1  ! minimal ice thickness (m)
       real :: xmaxd         = 9.0  ! maximal ice thickness (m; neg. = no limit)
-      real :: thicec        = 0.5  ! threshold to obtain make mask from comp. 
+      real :: thicec        = 0.5  ! threshold to obtain make mask from comp.
 !
 !     global integer
 !
@@ -320,7 +320,7 @@
       taunc = solar_day * taunc
 
       if (nrestart == 0) then ! read start file
-       
+
          call read_ice_surface
 !
 !        initialize
@@ -344,12 +344,12 @@
             call get_restart_integer('naccuo',naccuo)
             call get_restart_integer('nicec2d',nicec2d)
          endif
-  
+
          call mpbci(nstep)
          call mpbci(naccuout)
          call mpbci(naccuo)
          call mpbci(nicec2d)
-  
+
          call mpgetgp('xls'     ,xls     ,NHOR, 1)
          call mpgetgp('xts'     ,xts     ,NHOR, 1)
          call mpgetgp('xicec'   ,xicec   ,NHOR, 1)
@@ -379,7 +379,7 @@
          call mpgetgp('xstoia'  ,xstoia  ,NHOR, 1)
          call mpgetgp('xicecc'  ,xicecc  ,NHOR, 1)
 
-         if (newsurf == 1) then 
+         if (newsurf == 1) then
             call read_ice_surface
          else
             call mpgetgp('xclicec' ,xclicec ,NHOR,14)
@@ -535,7 +535,7 @@
 !     add new snow on ice
 !
       if(nsnow==1) then
-       where(xicec(:) >= cicemin) 
+       where(xicec(:) >= cicemin)
         xsnow(:)=xsnow(:)+xprs(:)*xdt
         xprs(:)=0.
        endwhere
@@ -577,12 +577,12 @@
 !
       if(nice == 0) then
 !
-!     climatological ice and 
+!     climatological ice and
 !     flux correction diagnostics
 !
        where(xiced(:) > 0. .or. xcliced2(:) > 0.)
         xflxice2(:)=(xiced(:)-xcliced2(:))*zrhoilfdt-xcflux(:)
-        xcflux(:)=0.                    
+        xcflux(:)=0.
         xiced(:)=xcliced2(:)
         xicec(:)=xclicec2(:)
        elsewhere
@@ -610,7 +610,7 @@
 !
 !     a) set compactness
 !
-       xicec(:)=xicecc(:)         
+       xicec(:)=xicecc(:)
 !
 !      b) flux correction (if switched on)
 !
@@ -621,7 +621,7 @@
         call addfci
         where(xiced(:) > 0. .and. xcliced2(:) > 0)
          xicec(:)=xclicec2(:)
-        endwhere    
+        endwhere
         where((xcliced2(:) > 0. .and. xicecc(:) > 0.999)                 &
      &    .or.(xcliced2(:)>0. .and. xmaxd>0. .and. xiced(:)>0.9*xmaxd))
          xicec(:)=1.
@@ -633,20 +633,20 @@
 !
       endif
 !
-!     correct sea ice to a maximum of xmaxd 
-!     get the needed hflx from the global ocean/ice 
+!     correct sea ice to a maximum of xmaxd
+!     get the needed hflx from the global ocean/ice
 !     update ximelt
 !
       zcflux(:)=0.
-      if(xmaxd >= 0.) then 
+      if(xmaxd >= 0.) then
        where(xiced(:) > xmaxd)
         zcflux(:)=(xiced(:)-xmaxd)*zrhoilfdt
         xiced(:)=xmaxd
         xcfluxr(:)=xcfluxr(:)+zcflux(:)
         ximelt(:)=ximelt(:)+zcflux(:)
 !
-!       diagnose the lost ice as accumulated snow 
-!       (to make the budged from the atm. output) 
+!       diagnose the lost ice as accumulated snow
+!       (to make the budged from the atm. output)
 !
         xsndch(:)=xsndch(:)+zcflux(:)*1000./CRHOI/zrhoilfdt/xdt
        end where
@@ -655,7 +655,7 @@
 !
 !     depug print out if needed
 !
-      if (nprint==2) then 
+      if (nprint==2) then
        allocate(zprf1(NLON*NLAT))
        allocate(zprf2(NLON*NLAT))
        allocate(zprf3(NLON*NLAT))
@@ -664,7 +664,7 @@
        call mpgagp(zprf2,xcfluxr,1)
        call mpgagp(zprf3,xcflux,1)
        call mpgagp(zprf4,xiced,1)
-       if(mypid==NROOT) then 
+       if(mypid==NROOT) then
         write(nud,*)'limit ice thickness (if > xmaxd):'
         write(nud,*)'heat for local correction: ',zprf1(nprhor)
         write(nud,*)'res. heat flux (after global adj.): ',zprf2(nprhor)
@@ -714,8 +714,8 @@
        endif
        zcflux(:)=xaheat(:)+xoheat(:)-xtsflux(:)-xsmflx(:)-ximelt(:)     &
      &          -xcflux(:)+xcfluxr(:)
-       call mpgagp(zprf1,zcflux,1)  
-       call mpgagp(zprf2,xflxice2,1) 
+       call mpgagp(zprf1,zcflux,1)
+       call mpgagp(zprf2,xflxice2,1)
        if(mypid==NROOT) then
         write(nud,*)'final check for balance :'
         write(nud,*)'uncoupled: ',zprf1(nprhor)
@@ -741,7 +741,7 @@
 !
 !     correct fresh water flux into ocean due to ice/snow changes
 !
-!     where(xls(:) < 0.5) 
+!     where(xls(:) < 0.5)
 !      xpme(:)=xpme(:)                                                  &
 !    &        -(xsnow(:)-zsnowold(:))/xdt                               &
 !    &        -(xiced(:)-zicedold(:))/xdt*CRHOI/1.E3
@@ -991,23 +991,23 @@
 !
 !     add flux from ocean
 !
-      where(xls(:) < 0.5) 
+      where(xls(:) < 0.5)
        xcflux(:)=xcflux(:)+xoflux(:)
       endwhere
 !
 !     make new ice
 !
-      where(xsst(:) <= TFREEZE .or. xiced(:) > 0.)               
+      where(xsst(:) <= TFREEZE .or. xiced(:) > 0.)
 !
 !      add flux due to snow conversion
 !
        ximelt(:)=xcflux(:)+xscflx(:)-xcfluxf(:)
 !
-!      new ice thickness 
+!      new ice thickness
 !
        xiced(:)=xiced(:)-ximelt(:)/zrhoilfdt
 !
-!     reset heat flux 
+!     reset heat flux
 !     (if ice > 0 and SST > TFREEZE (eg different climatologies)
 !     use part of the conductive heat flux to cool the ocean)
 !
@@ -1134,7 +1134,7 @@
 !
       real, allocatable :: zprf1(:),zprf2(:),zprf3(:),zprf4(:)
 !
-!     compute new compactness 
+!     compute new compactness
 !
       do jhor=1,NHOR
        if(piced(jhor) > 0. .and. picedc(jhor) > 0) then
@@ -1144,7 +1144,7 @@
         else
          picec(jhor)=xclicec2(jhor)*sqrt(piced(jhor)/picedc(jhor))
         endif
-       endif   
+       endif
       enddo
 !
 !     debug printout
@@ -1211,7 +1211,7 @@
          zqmelt(jhor)=0.
         endif
 !
-!     add residual flux to conductive heat flux 
+!     add residual flux to conductive heat flux
 !
         xcflux(jhor)=xcflux(jhor)+zqmelt(jhor)
 !
@@ -1253,7 +1253,7 @@
 !     c) convert snow to sea ice if snow/ice interface is below sea level:
 !     note: xsnow = h2o equiv.)
 !     note: if CLFSN\=CLFI, this conversion does not conserve mass and
-!     energy. Here, both is conserved by an additional flux 
+!     energy. Here, both is conserved by an additional flux
 !     (i.e. by using zdsnow*1.E3*CLFSN instead of zdice*CRHOI*CLFI)
 !
       xstoi(:)=0.
@@ -1271,7 +1271,7 @@
 !
        xstoi(:)=zdice(:)*CRHOI/1000./xdt
 !
-!     diagnose the converted snow as snowmelt 
+!     diagnose the converted snow as snowmelt
 !
        xsmelt(:)=xsmelt(:)-zdsnow/xdt
        xsmflx(:)=xsmflx(:)-zdsnow*1.E3*CLFSN/xdt
@@ -1327,7 +1327,7 @@
 !
 !     compute conductive heat flux
 !
-      where(xiced(:) < xmind) 
+      where(xiced(:) < xmind)
        xcflux(:)=xheat(:)
        xcfluxf(:)=0.
       end where
@@ -1336,7 +1336,7 @@
        zckap(:)=(CKAPSN*zhsnow(:)+CKAPI*xiced(:))/(zhsnow(:)+xiced(:))
       endwhere
 !
-!     limit ice thickness 
+!     limit ice thickness
 !
       if(xmaxd >= 0.) then
        where(xiced(:) >= xmaxd)
@@ -1344,7 +1344,7 @@
        endwhere
       endif
 !
-      where(xiced(:) >= xmind) 
+      where(xiced(:) >= xmind)
        xfluxc(:)=zckap(:)*(xts(:)-xsst(:))/(zhsnow(:)+xiced(:))
        xcflux(:)=xfluxc(:)
        xcfluxf(:)=zckap(:)*(TFREEZE-xsst(:))/(zhsnow(:)+xiced(:))
@@ -1444,7 +1444,7 @@
       ih(1) = 791
       call mpwritegph(71,xcliced2,NHOR,1,ih)
       ih(1) = 792
-      call mpwritegph(71,xicecc,NHOR,1,ih)    
+      call mpwritegph(71,xicecc,NHOR,1,ih)
       ih(1) = 794
       call mpwritegph(71,xcpmea,NHOR,1,ih)
       ih(1) = 795
@@ -1497,7 +1497,7 @@
        end where
       else
        where(xls(:) < 0.5)
-        xflxice2(:)=(xiced(:)-xcliced2(:))*zrhoilf/xdt                  
+        xflxice2(:)=(xiced(:)-xcliced2(:))*zrhoilf/xdt
        end where
       endif
 !
@@ -1559,7 +1559,7 @@
          xcflux(jhor)=0.
         else
 !
-!     else: give flux correction to the ocean  
+!     else: give flux correction to the ocean
 !
          zflr(jhor)=xflxice2(jhor)
         endif
@@ -1658,7 +1658,7 @@
 !     --------
 !     CALCULATE ICE SKIN-TEMPERATURE AS A PROGNOSTIC VARIABLE
 !
-!     
+!
       zrcpl=xmind*CRHOI*CPI
 !
 !     preset fluxes
@@ -1777,7 +1777,7 @@
       subroutine iceget
       use icemod
 !
-!     get sea ice climatology for the actual time step 
+!     get sea ice climatology for the actual time step
 !     (using linear interpolation from monthly means)
 !
       call momint(nperpetual_ice,nstep,jm1,jm2,zgw2)
@@ -1804,7 +1804,7 @@
         write(nud,*)'In iceget:'
         write(nud,*)' jm1,jm2= ',jm1,jm2,' gw1,gw2= ',zgw1,zgw2
        endif
-      endif  
+      endif
 !
       return
       end subroutine iceget
@@ -1844,12 +1844,12 @@
 
       call mpgagp(zc,xclicec,14)
       zd(:,:,:) = 0.0
-      
+
       if (mypid == NROOT) then
          do jm = 0 , 13
-   
+
       !     northern hemisphere
-      
+
             do jlat = 1 , NLAT/2
                where (zc(:,jlat,jm) >= cmaxn)
                   zd(:,jlat,jm)=hmaxn*zhfac(jm)
@@ -1860,9 +1860,9 @@
                   zd(:,jlat,jm)=hminn*zhfac(jm)
                endwhere
             enddo
-      
+
       !     southern hemisphere
-      
+
             do jlat = NLAT/2+1 , NLAT
                where (zc(:,jlat,jm) >= cmins)
                   zd(:,jlat,jm)=hmaxs
@@ -1870,7 +1870,7 @@
                   zd(:,jlat,jm)=hmins+zc(:,jlat,jm)
                endwhere
             enddo
-   
+
          enddo ! jm
       endif ! (mypid == NROOT)
 
@@ -1913,4 +1913,4 @@
       endif
 !
       return
-      end subroutine getiflx      
+      end subroutine getiflx
